@@ -1,4 +1,4 @@
-fetch("/api/alunos")
+fetch("/buscar")
   .then(response => response.json())
   .then(alunos => {
     console.log(alunos);
