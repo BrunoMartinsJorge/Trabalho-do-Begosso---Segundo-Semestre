@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Cidades</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='index.css') }}">
+</head>
+<body>
+<h1>Cidades disponíveis</h1>
+{% for cidade in cidades %}
+    <li onclick="apagarCidade('{{ cidade }}')">{{ cidade['Codigo'] }}</li>
+{% endfor %}
+<form method="POST" action="/adicionar-cidade">
+    <label>
+        <input type="number" placeholder="Insira o código da cidade" id="codigo" name="codigo" required/>
+    </label>
+    <label>
+        <input type="text" placeholder="Insira o nome da cidade" id="descricao" name="descricao" required/>
+    </label>
+    <label>
+        <input type="text" placeholder="Insira o estado da cidade" id="estado" name="estado" required/>
+    </label>
+    <input type="submit" value="Adicionar Cidade"/>
+</form>
+</body>
+<script>
+    function apagarCidade(cidade) {
+
+    }
+</script>
+</html>
