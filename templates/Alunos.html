@@ -2,11 +2,10 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>Alunos</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='index.css') }}"/>
 </head>
 <body>
-<h1>Entre em Contato</h1>
 <nav>
     <ul>
         <li><a href="{{ url_for('alunos_router') }}">Alunos</a></li>
@@ -16,15 +15,8 @@
         <li><a href="{{ url_for('professores_router') }}">Professores</a></li>
     </ul>
 </nav>
-<form action="/salvar_dados" method="POST">
-    <label for="nome">Nome:</label><br>
-    <input type="text" id="nome" name="nome" required><br><br>
-
-    <label for="email">Email:</label><br>
-    <input type="email" id="email" name="email" required><br><br>
-
-    <input type="submit" value="Enviar">
-</form>
+<h1>Entre em Contato</h1>
+Salvar
 <button onclick="buscar()">Buscar</button>
 </body>
 <script>

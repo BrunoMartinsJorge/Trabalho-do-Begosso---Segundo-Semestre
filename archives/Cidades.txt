@@ -1,8 +1,1 @@
-Codigo: 1, Descricao: Candido Mota, Estado: SP
-Codigo: 1, Descricao: Candido Mota, Estado: SP
-Codigo:1;Descricao:sasasa;Estado:sasas
-Codigo :2;Descricao :asas;Estado :sa
-Codigo :3, Descricao :asasas, Estado :sasasasas
-Codigo :4, Descricao :Assis SP, Estado :asasasasasas
-Codigo :2, Descricao :assasas, Estado :sasasas
-Codigo :2, Descricao :asasasas, Estado :asasasasas
+Codigo: 0, Descricao: 0, Estado: 0

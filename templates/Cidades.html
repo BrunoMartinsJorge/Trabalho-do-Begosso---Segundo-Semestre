@@ -6,6 +6,15 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='index.css') }}">
 </head>
 <body>
+<nav>
+    <ul>
+        <li><a href="{{ url_for('alunos_router') }}">Alunos</a></li>
+        <li><a href="{{ url_for('cidades_router') }}">Cidades</a></li>
+        <li><a href="{{ url_for('matriculas_router') }}">Matrículas</a></li>
+        <li><a href="{{ url_for('modalidades_router') }}">Modalidades</a></li>
+        <li><a href="{{ url_for('professores_router') }}">Professores</a></li>
+    </ul>
+</nav>
 <h1>Cidades disponíveis</h1>
 {% for cidade in cidades %}
     <li onclick="apagarCidade('{{ cidade }}')">{{ cidade['Codigo'] }}</li>

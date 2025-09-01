@@ -6,15 +6,29 @@ from utils.OpereacoesBasicas import OperacoesBasicas
 
 app = Flask(__name__)
 
-
 @app.route('/')
 def formulario():
     return render_template('index.html')
 
+@app.route('/alunos')
+def alunos_router():
+    return render_template('Alunos.html')
 
-@app.route('/inicio')
-def inicio():
-    return render_template('pagina.html')
+@app.route('/cidades')
+def cidades_router():
+    return render_template('Cidades.html')
+
+@app.route('/modalidades')
+def modalidades_router():
+    return render_template('Modalidades.html')
+
+@app.route('/professores')
+def professores_router():
+    return render_template('Professores.html')
+
+@app.route('/matriculas')
+def matriculas_router():
+    return render_template('Matriculas.html')
 
 
 @app.route('/cidades')

@@ -1,0 +1,1 @@
+Esquerda: 0, Direita: 0, Codigo: 0, Localizacao: -1
