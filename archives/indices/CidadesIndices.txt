@@ -1,1 +1,2 @@
-Esquerda: 0, Direita: 0, Codigo: 0, Localizacao: -1
+{"esquerda": -1, "direita": 1, "info": 1, "index": 0}
+{"esquerda": -1, "direita": -1, "info": 2, "index": 1}

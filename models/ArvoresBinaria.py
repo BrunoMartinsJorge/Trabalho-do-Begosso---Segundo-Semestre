@@ -1,31 +1,46 @@
 from typing import List, Any
-
+from models.No import No
 
 class ArvoreBinaria:
+    def __init__(self):
+        self.raiz = None
 
-    def __init__(self, esquerda=-1, direita=-1, info=0, index=0):
-        self.esquerda = int(esquerda)
-        self.direita = int(direita)
-        self.info = int(info)
-        self.index = int(index)
+    def inserir(self, codigo: int, localizacao: int):
+        if self.raiz is None:
+            self.raiz = No(codigo, localizacao)
+        else:
+            self._inserir(self.raiz, codigo, localizacao)
 
-    def __str__(self):
-        return f"Esquerda: {self.esquerda}, Direita: {self.direita}, Codigo: {self.info}, Localizacao: {self.index}"
+    def _inserir(self, atual: No, codigo: int, localizacao: int):
+        if codigo < atual.codigo:
+            if atual.esquerda is None:
+                atual.esquerda = No(codigo, localizacao)
+            else:
+                self._inserir(atual.esquerda, codigo, localizacao)
+        else:
+            if atual.direita is None:
+                atual.direita = No(codigo, localizacao)
+            else:
+                self._inserir(atual.direita, codigo, localizacao)
 
-    @staticmethod
-    def __ver_se_existe_na_lista(lista_codigo, codigo_atual):
-        return codigo_atual in lista_codigo
+    def buscar(self, codigo: int) -> No | None:
+        return self._buscar(self.raiz, codigo)
 
-    @staticmethod
-    def leitura_exaustiva_generica(indices: List["ArvoreBinaria"], lista: List[Any]):
-        usados = set()
-        while len(usados) < len(lista):
-            menor = None
-            for registro in indices:
-                codigo = registro.info
-                if not ArvoreBinaria.__ver_se_existe_na_lista(usados, codigo):
-                    if menor is None or codigo < menor.info:
-                        menor = registro
-            if menor:
-                print(lista[menor.index])
-                usados.add(menor.info)
+    def _buscar(self, atual: No, codigo: int) -> No | None:
+        if atual is None:
+            return None
+        if codigo == atual.codigo:
+            return atual
+        if codigo < atual.codigo:
+            return self._buscar(atual.esquerda, codigo)
+        return self._buscar(atual.direita, codigo)
+
+    def em_ordem(self):
+        """Percorre em ordem crescente de códigos"""
+        def _em_ordem(atual):
+            if atual:
+                yield from _em_ordem(atual.esquerda)
+                yield atual
+                yield from _em_ordem(atual.direita)
+
+        yield from _em_ordem(self.raiz)

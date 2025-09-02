@@ -64,9 +64,9 @@ def adicionar_cidade():
     codigo = request.form['codigo']
     descricao = request.form['descricao']
     estado = request.form['estado']
-    cidade = Cidades(codigo, descricao, estado)
-    op = OperacoesBasicas()
-    op.incluir_novo_registro(TipoRegistroEnum.CIDADE, cidade)
+    objeto = Cidades(codigo, descricao, estado)
+    op = OperacoesBasicas(TipoRegistroEnum.CIDADE)
+    op.inserir_dados(objeto)
     return """
     <script>
         alert('Cidade adicionada com sucesso!');
