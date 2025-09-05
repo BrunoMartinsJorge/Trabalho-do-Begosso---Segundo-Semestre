@@ -1,5 +1,5 @@
 class Cidades:
-    def __init__(self, codigo=0, descricao=0, estado=0):
+    def __init__(self, codigo: int = 0, descricao: str = "", estado: str = ""):
         self.codigo = int(codigo)
         self.descricao = str(descricao)
         self.estado = str(estado)
@@ -9,3 +9,6 @@ class Cidades:
 
     def __repr__(self):
         return f"Cidade(codigo={self.codigo}, descricao='{self.descricao}', estado='{self.estado}')"
+
+    def to_dict(self):
+        return {"codigo": self.codigo, "descricao": self.descricao, "estado": self.estado}

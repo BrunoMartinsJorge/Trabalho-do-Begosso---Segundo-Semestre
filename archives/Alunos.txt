@@ -1,0 +1,34 @@
+[
+    {
+        "codigo": 5,
+        "nome": "Pedro Almeida",
+        "codCidade": 5,
+        "nascimento": "1998-09-10",
+        "peso": 75,
+        "altura": 1
+    },
+    {
+        "codigo": 3,
+        "nome": "Carlos Souza",
+        "codCidade": 3,
+        "nascimento": "2001-02-15",
+        "peso": 80,
+        "altura": 1
+    },
+    {
+        "codigo": 4,
+        "nome": "Ana Santos",
+        "codCidade": 4,
+        "nascimento": "2002-07-30",
+        "peso": 55,
+        "altura": 1
+    },
+    {
+        "codigo": 2,
+        "nome": "Maria Oliveira",
+        "codCidade": 2,
+        "nascimento": "1999-11-23",
+        "peso": 60,
+        "altura": 1
+    }
+]

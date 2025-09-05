@@ -15,13 +15,67 @@
         <li><a href="{{ url_for('professores_router') }}">Professores</a></li>
     </ul>
 </nav>
-<h1>Entre em Contato</h1>
-Salvar
-<button onclick="buscar()">Buscar</button>
+{% for aluno in alunos %}
+    <li>{{ aluno }}</li>
+{% endfor %}
+<form method="POST" action="/alunos/cadastrar_aluno">
+    <label>
+        <input type="number" placeholder="Insira o código do aluno" id="codigo" name="codigo" required/>
+    </label>
+    <label>
+        <input type="text" placeholder="Insira o nome do aluno" id="nome" name="nome" required/>
+    </label>
+    <label>
+        <input type="number" placeholder="Insira o codigo da cidade" id="codCidade" name="codCidade" required/>
+    </label>
+    <label>
+        <input type="date" placeholder="Insira a data de nascimento" id="nascimento" name="nascimento" required/>
+    </label>
+    <label>
+        <input type="number" placeholder="Insira o peso" id="peso" name="peso" required/>
+    </label>
+    <label>
+        <input type="number" placeholder="Insira a altura" id="altura" name="altura" required/>
+    </label>
+    <input type="submit" value="Adicionar Cidade"/>
+</form>
+<label>
+    <select name="select">
+        <option value="valor1">Valor 1</option>
+        <option value="valor2" selected>Valor 2</option>
+        <option value="valor3">Valor 3</option>
+    </select>
+</label>
+<form method="GET" action="/alunos/buscar_aluno_por_codigo">
+    <label>
+        <input type="number" placeholder="Insira o código da cidade para buscar" id="codigo" name="codigo" required>
+    </label>
+    <input type="submit" value="Buscar Cidade"/>
+</form>
+<form method="POST" action="/alunos/apagar_alunos_por_codigo">
+    <label>
+        <input type="number" placeholder="Insira o código da cidade para apagar" id="codigo" name="codigo" required>
+    </label>
+    <input type="submit" value="Apagar Cidade"/>
+</form>
+<input type="button" value="Leitura exaustiva" onClick="busca_exaustiva()"/>
+<ul id="lista-alunos"></ul>
+
 </body>
 <script>
-    function buscar() {
-        console.log("Oi")
+    function busca_exaustiva() {
+        const lista = document.getElementById("lista-alunos");
+        lista.innerHTML = "";
+        fetch("http://127.0.0.1:5000/alunos/leitura_exaustiva")
+            .then(response => response.json())
+            .then(data => {
+                const lista = document.getElementById("lista-alunos");
+                data.forEach(cidade => {
+                    const li = document.createElement("li");
+                    li.textContent = `${cidade.codigo} - ${cidade.descricao} (${cidade.estado})`;
+                    lista.appendChild(li);
+                });
+            });
     }
 </script>
 </html>

@@ -1,10 +1,26 @@
 from flask import Flask, render_template, request
 
-from enums.TipoRegistro import TipoRegistroEnum
-from models.Cidades import Cidades
-from utils.OpereacoesBasicas import OperacoesBasicas
+from controllers.CidadesController import cidade_bp
+from controllers.AlunoController import aluno_bp
+from controllers.MatriculasController import matriculas_bp
+from controllers.ModalidadesController import modalidades_bp
+from controllers.ProfessorController import professor_bp
+from exceptions.ExceptionHandler import register_error_handlers
+from services.AlunoService import AlunoService
+from services.CidadeService import CidadeService
+from services.MatriculasService import MatriculasService
+from services.ModalidadesService import ModalidadesService
+from services.ProfessorService import ProfessoresService
 
 app = Flask(__name__)
+
+app.register_blueprint(cidade_bp)
+app.register_blueprint(aluno_bp)
+app.register_blueprint(matriculas_bp)
+app.register_blueprint(modalidades_bp)
+app.register_blueprint(professor_bp)
+
+register_error_handlers(app)
 
 @app.route('/')
 def formulario():
@@ -12,68 +28,28 @@ def formulario():
 
 @app.route('/alunos')
 def alunos_router():
-    return render_template('Alunos.html')
+    alunoService = AlunoService()
+    return render_template('Alunos.html', alunos=alunoService.buscar_todos_alunos())
 
 @app.route('/cidades')
 def cidades_router():
-    return render_template('Cidades.html')
+    cidadesService = CidadeService()
+    return render_template('Cidades.html', cidades=cidadesService.buscar_todas_cidades(), arvores=cidadesService.carregar_arvore_binaria())
 
 @app.route('/modalidades')
 def modalidades_router():
-    return render_template('Modalidades.html')
+    modalidadesServices = ModalidadesService()
+    return render_template('Modalidades.html', modalidades=modalidadesServices.buscar_todas_modalidades())
 
 @app.route('/professores')
 def professores_router():
-    return render_template('Professores.html')
+    professoresService = ProfessoresService()
+    return render_template('Professores.html', professores=professoresService.buscar_todos_professores())
 
 @app.route('/matriculas')
 def matriculas_router():
-    return render_template('Matriculas.html')
-
-
-@app.route('/cidades')
-def cidades():
-    cidades = []
-    with open('./archives/Cidades.txt', 'r') as arquivo:
-        for linha in arquivo:
-            linha = linha.strip()
-            if not linha:
-                continue
-            partes = linha.replace(';', ',').split(',')
-            info = {}
-            for parte in partes:
-                if ':' in parte:
-                    chave, valor = parte.split(':', 1)
-                    info[chave.strip()] = valor.strip()
-
-            cidades.append(info)
-    return render_template('cidades.html', cidades=cidades)
-
-@app.route('/salvar_dados', methods=['POST'])
-def salvar_dados():
-    nome = request.form['nome']
-    email = request.form['email']
-    dados = f"Nome: {nome}, Email: {email}\n"
-    with open('./archives/Matriculas.txt', 'a') as arquivo:
-        arquivo.write(dados)
-    return "Dados salvos com sucesso!"
-
-
-@app.route('/adicionar-cidade', methods=['POST'])
-def adicionar_cidade():
-    codigo = request.form['codigo']
-    descricao = request.form['descricao']
-    estado = request.form['estado']
-    objeto = Cidades(codigo, descricao, estado)
-    op = OperacoesBasicas(TipoRegistroEnum.CIDADE)
-    op.inserir_dados(objeto)
-    return """
-    <script>
-        alert('Cidade adicionada com sucesso!');
-        window.location.href = '/cidades';  // redireciona depois do alert
-    </script>
-    """
-
+    matriculasService = MatriculasService()
+    return render_template('Matriculas.html', matriculas=matriculasService.buscar_todas_matriculas())
 
 if __name__ == '__main__':
     app.run(debug=True)

@@ -2,7 +2,7 @@ import json
 import os
 from typing import Any, List
 from enums.TipoRegistro import TipoRegistroEnum
-from models.Alunos import Aluno
+from models.Alunos import Alunos
 from models.ArvoresBinaria import ArvoreBinaria
 from models.Cidades import Cidades
 from models.Matriculas import Matriculas
@@ -18,27 +18,22 @@ class OperacoesBasicas:
         self.pasta_indices = os.path.join(self.pasta_archives, 'indices')
         os.makedirs(self.pasta_indices, exist_ok=True)
 
-    def carregar_cidades(self, caminho_arquivo: str) -> list[Cidades]:
+    import json
+
+    def buscar_todas_cidades(self) -> list[Cidades]:
         cidades = []
-        with open(caminho_arquivo, "r", encoding="utf-8") as arquivo:
-            for linha in arquivo:
-                linha = linha.strip()
-                if not linha:
-                    continue
-                partes = [p.strip() for p in linha.split(",")]
-                dados = {}
-                for parte in partes:
-                    chave, valor = parte.split(":", 1)
-                    dados[chave.strip()] = valor.strip()
+        with open(self.arquivo_dados, "r", encoding="utf-8") as arquivo:
+            dados_json = json.load(arquivo)
+            for d in dados_json:
                 cidade = Cidades(
-                    codigo=int(dados["Codigo"]),
-                    descricao=dados["Descricao"],
-                    estado=dados["Estado"]
+                    codigo=int(d["codigo"]),
+                    descricao=d["descricao"],
+                    estado=d["estado"]
                 )
                 cidades.append(cidade)
         return cidades
 
-    def carregar_dados(self) -> str:
+    def inserir_dados(self, objeto: Cidades | Alunos | Matriculas | Professores | Modalidades):
         match self.tipo_registro:
             case TipoRegistroEnum.ALUNO:
                 path_dados = os.path.join(self.pasta_archives, "alunos.txt")
@@ -56,26 +51,7 @@ class OperacoesBasicas:
         if not os.path.exists(path_dados):
             open(path_dados, "w", encoding="utf-8").close()
 
-        with open(path_dados, 'r', encoding="utf-8") as arquivo:
-            return arquivo.read()
-
-    def inserir_dados(self, objeto: Cidades | Aluno | Matriculas | Professores | Modalidades):
-        match self.tipo_registro:
-            case TipoRegistroEnum.ALUNO:
-                path_dados = os.path.join(self.pasta_archives, "alunos.txt")
-            case TipoRegistroEnum.PROFESSOR:
-                path_dados = os.path.join(self.pasta_archives, "professores.txt")
-            case TipoRegistroEnum.MODALIDADE:
-                path_dados = os.path.join(self.pasta_archives, "modalidades.txt")
-            case TipoRegistroEnum.CIDADE:
-                path_dados = os.path.join(self.pasta_archives, "cidades.txt")
-            case TipoRegistroEnum.MATRICULA:
-                path_dados = os.path.join(self.pasta_archives, "matriculas.txt")
-            case _:
-                raise ValueError("Tipo de registro inválido.")
-
-        if not os.path.exists(path_dados):
-            open(path_dados, "w", encoding="utf-8").close()
+        print(self.carregar_cidades(path_dados))
 
         with open(path_dados, 'a', encoding="utf-8") as arquivo:
             arquivo.write(str(objeto) + "\n")

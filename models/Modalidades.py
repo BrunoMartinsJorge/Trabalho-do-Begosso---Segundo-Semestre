@@ -9,3 +9,8 @@ class Modalidades:
 
     def __str__(self):
         return f"{self.codigo};{self.descricao};{self.codProfessor};{self.valorDaAula};{self.limiteAlunos};{self.totalMatriculas};"
+
+    def to_dict(self):
+        return {"codigo": self.codigo, "descricao": self.descricao, "codProfessor": self.codProfessor,
+                "valorDaAula": self.valorDaAula, "limiteAlunos": self.limiteAlunos,
+                "totalMatriculas": self.totalMatriculas}

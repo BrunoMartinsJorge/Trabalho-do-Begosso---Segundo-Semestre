@@ -1,0 +1,9 @@
+[
+    {"codigo": 1, "codAluno": 1, "codModalidade": 1, "quantidadeAulas": 8},
+    {"codigo": 2, "codAluno": 2, "codModalidade": 2, "quantidadeAulas": 10},
+    {"codigo": 3, "codAluno": 3, "codModalidade": 1, "quantidadeAulas": 6},
+    {"codigo": 4, "codAluno": 4, "codModalidade": 4, "quantidadeAulas": 12},
+    {"codigo": 5, "codAluno": 5, "codModalidade": 5, "quantidadeAulas": 9},
+    {"codigo": 6, "codAluno": 1, "codModalidade": 3, "quantidadeAulas": 5},
+    {"codigo": 7, "codAluno": 2, "codModalidade": 4, "quantidadeAulas": 7}
+]

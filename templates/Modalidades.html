@@ -15,5 +15,58 @@
         <li><a href="{{ url_for('professores_router') }}">Professores</a></li>
     </ul>
 </nav>
+{% for modalidade in modalidades %}
+    <li>{{ modalidade }}</li>
+{% endfor %}
+<form method="POST" action="/cidades/cadastrar_cidade">
+    <label>
+        <input type="number" placeholder="Insira o código da cidade" id="codigo" name="codigo" required/>
+    </label>
+    <label>
+        <input type="text" placeholder="Insira o nome da cidade" id="descricao" name="descricao" required/>
+    </label>
+    <label>
+        <input type="text" placeholder="Insira o estado da cidade" id="estado" name="estado" required/>
+    </label>
+    <input type="submit" value="Adicionar Cidade"/>
+</form>
+<label>
+    <select name="select">
+        <option value="valor1">Valor 1</option>
+        <option value="valor2" selected>Valor 2</option>
+        <option value="valor3">Valor 3</option>
+    </select>
+</label>
+<form method="GET" action="/cidades/buscar_cidade_por_codigo">
+    <label>
+        <input type="number" placeholder="Insira o código da cidade para buscar" id="codigo" name="codigo" required>
+    </label>
+    <input type="submit" value="Buscar Cidade"/>
+</form>
+<form method="POST" action="/cidades/apagar_cidades_por_codigo">
+    <label>
+        <input type="number" placeholder="Insira o código da cidade para apagar" id="codigo" name="codigo" required>
+    </label>
+    <input type="submit" value="Apagar Cidade"/>
+</form>
+<input type="button" value="Leitura exaustiva" onClick="busca_exaustiva()"/>
+<ul id="lista-cidades"></ul>
+
 </body>
+<script>
+    function busca_exaustiva() {
+        const lista = document.getElementById("lista-cidades");
+        lista.innerHTML = "";
+        fetch("http://127.0.0.1:5000/cidades/leitura_exaustiva")
+            .then(response => response.json())
+            .then(data => {
+                const lista = document.getElementById("lista-cidades");
+                data.forEach(cidade => {
+                    const li = document.createElement("li");
+                    li.textContent = `${cidade.codigo} - ${cidade.descricao} (${cidade.estado})`;
+                    lista.appendChild(li);
+                });
+            });
+    }
+</script>
 </html>

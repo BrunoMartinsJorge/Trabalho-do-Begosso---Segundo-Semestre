@@ -1,46 +1,56 @@
 from typing import List, Any
-from models.No import No
+
 
 class ArvoreBinaria:
-    def __init__(self):
-        self.raiz = None
+    def __init__(self, esquerda: int = -1, direita: int = -1, info: int = 0, index: int = 0):
+        self.esquerda = int(esquerda)
+        self.direita = int(direita)
+        self.info = int(info)
+        self.index = int(index)
 
-    def inserir(self, codigo: int, localizacao: int):
-        if self.raiz is None:
-            self.raiz = No(codigo, localizacao)
-        else:
-            self._inserir(self.raiz, codigo, localizacao)
+    def __repr__(self):
+        return f"ArvoreBinaria({self.esquerda}, {self.direita}, {self.info}, {self.index})"
 
-    def _inserir(self, atual: No, codigo: int, localizacao: int):
-        if codigo < atual.codigo:
-            if atual.esquerda is None:
-                atual.esquerda = No(codigo, localizacao)
-            else:
-                self._inserir(atual.esquerda, codigo, localizacao)
-        else:
-            if atual.direita is None:
-                atual.direita = No(codigo, localizacao)
-            else:
-                self._inserir(atual.direita, codigo, localizacao)
+    @staticmethod
+    def construir_arvore(dados: List[Any]):
+        def get_codigo(item):
+            if isinstance(item, dict):
+                if 'codigo' in item:
+                    return int(item['codigo'])
+                if 'Codigo' in item:
+                    return int(item['Codigo'])
+                raise KeyError("Chave 'codigo' não encontrada no dict")
+            if hasattr(item, 'codigo'):
+                return int(getattr(item, 'codigo'))
+            if hasattr(item, 'Codigo'):
+                return int(getattr(item, 'Codigo'))
+            raise AttributeError("Objeto não possui atributo 'codigo' ou 'Codigo'")
 
-    def buscar(self, codigo: int) -> No | None:
-        return self._buscar(self.raiz, codigo)
+        codigos = [get_codigo(d) for d in dados]
 
-    def _buscar(self, atual: No, codigo: int) -> No | None:
-        if atual is None:
-            return None
-        if codigo == atual.codigo:
-            return atual
-        if codigo < atual.codigo:
-            return self._buscar(atual.esquerda, codigo)
-        return self._buscar(atual.direita, codigo)
+        nos = [ArvoreBinaria(esquerda=-1, direita=-1, info=cod, index=i)
+               for i, cod in enumerate(codigos)]
 
-    def em_ordem(self):
-        """Percorre em ordem crescente de códigos"""
-        def _em_ordem(atual):
-            if atual:
-                yield from _em_ordem(atual.esquerda)
-                yield atual
-                yield from _em_ordem(atual.direita)
+        if not nos:
+            return nos, -1
 
-        yield from _em_ordem(self.raiz)
+        draiz = 0
+
+        for novo_idx in range(1, len(nos)):
+            current = draiz
+            while True:
+                if nos[novo_idx].info < nos[current].info:
+
+                    if nos[current].esquerda == -1:
+                        nos[current].esquerda = novo_idx
+                        break
+                    else:
+                        current = nos[current].esquerda
+                else:
+                    if nos[current].direita == -1:
+                        nos[current].direita = novo_idx
+                        break
+                    else:
+                        current = nos[current].direita
+
+        return nos, draiz

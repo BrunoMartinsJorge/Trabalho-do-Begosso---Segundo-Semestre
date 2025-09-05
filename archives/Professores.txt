@@ -1,0 +1,7 @@
+[
+    {"codigo": 5, "nome": "Marcelo Dias", "endereco": "Av. Ipiranga, 200", "telefone": "51966554433", "codCidade": 5},
+    {"codigo": 3, "nome": "Paulo Martins", "endereco": "Rua das Flores, 300", "telefone": "31988776655", "codCidade": 3},
+    {"codigo": 2, "nome": "Fernanda Costa", "endereco": "Av. Central, 45", "telefone": "21999887766", "codCidade": 2},
+    {"codigo": 4, "nome": "Juliana Rocha", "endereco": "Rua XV de Novembro, 50", "telefone": "41977665544", "codCidade": 4},
+    {"codigo": 1, "nome": "Ricardo Lima", "endereco": "Rua A, 123", "telefone": "11987654321", "codCidade": 1}
+]

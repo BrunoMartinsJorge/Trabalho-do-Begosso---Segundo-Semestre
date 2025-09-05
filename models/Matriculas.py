@@ -7,3 +7,10 @@ class Matriculas:
 
     def __str__(self):
         return f"{self.codigo},{self.codAluno},{self.codModalidade};{self.quantidadeAulas}"
+
+    def __repr__(self):
+        return f"Cidade(codigo={self.codigo}, codAluno='{self.codAluno}', codModalidade='{self.codModalidade}', quantidadeAulas='{self.quantidadeAulas}')"
+
+    def to_dict(self):
+        return {"codigo": self.codigo, "codAluno": self.codAluno, "codModalidade": self.codModalidade,
+                "quantidadeAulas": self.quantidadeAulas}

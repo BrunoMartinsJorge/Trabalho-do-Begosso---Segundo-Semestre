@@ -1,2 +1,0 @@
-{"esquerda": -1, "direita": 1, "info": 1, "index": 0}
-{"esquerda": -1, "direita": -1, "info": 2, "index": 1}
