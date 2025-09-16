@@ -29,23 +29,11 @@ class ProfessoresService:
         pasta_archives = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'archives')
         path_professores = os.path.join(pasta_archives, "Professores.txt")
         os.makedirs(pasta_archives, exist_ok=True)
-
-        if os.path.exists(path_professores):
-            with open(path_professores, "r", encoding="utf-8") as arquivo:
-                try:
-                    professores = json.load(arquivo)
-                except json.JSONDecodeError:
-                    professores = []
-        else:
-            professores = []
-
+        professores = ProfessoresService.__buscar_todos_professores()
         ProfessoresService.__verificar_se_codigo_existe(ProfessoresService, professores, novo_professor)
-
         professores.append(novo_professor.to_dict())
-
         with open(path_professores, "w", encoding="utf-8") as arquivo:
             json.dump(professores, arquivo, indent=4, ensure_ascii=False)
-
         professores = [Professores(**d) for d in professores]
         return jsonify([c.to_dict() for c in professores]), 201
 

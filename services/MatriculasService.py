@@ -205,10 +205,11 @@ class MatriculasService:
     @staticmethod
     def buscar_matriculas_modalidades(cod_modalidade: int) -> List[Matriculas]:
         matriculaService = MatriculasService()
-        matriculas = matriculaService.buscar_todas_matriculas()
+        matriculas = matriculaService.leitura_exaustiva()
+        print(matriculas)
         matriculas_modalidade: List[Matriculas] = []
         for matricula in matriculas:
-            if matricula.codModalidade == cod_modalidade:
+            if int(matricula['codModalidade']) == cod_modalidade:
                 matriculas_modalidade.append(matricula)
         return matriculas_modalidade
 

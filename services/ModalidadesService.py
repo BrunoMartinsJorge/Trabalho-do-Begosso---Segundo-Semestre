@@ -210,12 +210,13 @@ class ModalidadesService:
     def __calcular_faturamento(self, modalidade: Any) -> float:
         from services.MatriculasService import MatriculasService
         matriculas_modalidade: List[Matriculas] = MatriculasService.buscar_matriculas_modalidades(int(modalidade['codigo']))
+        print(matriculas_modalidade)
         if not matriculas_modalidade:
             return 0.0
         valor_modalidade = modalidade['valorDaAula']
         quantidade_aulas: int = 0
         for matricula in matriculas_modalidade:
-            quantidade_aulas += matricula.quantidadeAulas
+            quantidade_aulas += int(matricula['quantidadeAulas'])
         return quantidade_aulas * valor_modalidade
 
     def carregar_arvore_binaria(self) -> ArvoreBinaria:
