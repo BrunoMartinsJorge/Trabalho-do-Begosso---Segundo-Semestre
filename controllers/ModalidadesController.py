@@ -32,7 +32,14 @@ def apagar_modalidade_por_codigo():
     modalidadesService.excluir_modalidade(int(codigo))
     return "Matricula apagada com sucesso!"
 
-
 @modalidades_bp.route("/leitura_exaustiva", methods=["GET"])
 def leitura_exaustiva():
     return modalidadesService.leitura_exaustiva()
+
+@modalidades_bp.route("/buscar_faturamento", methods=["GET"])
+def buscar_faturamento():
+    codigo = request.args.get("codigo")
+    faturamento_dto = modalidadesService.faturamento_por_modalidade(int(codigo))
+    return jsonify({
+        "faturamento": faturamento_dto.to_dict()
+    }), 200

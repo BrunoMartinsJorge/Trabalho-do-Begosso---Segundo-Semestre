@@ -4,11 +4,12 @@ from typing import Any, List
 
 from flask import jsonify
 
+from dto.ListaProfessores import ListaProfessores
 from exceptions.ObjectNotExistsException import ObjectNotExistsException
 from models.ArvoresBinaria import ArvoreBinaria
 from models.Professores import Professores
 from exceptions.ObjectExistsException import ObjectExistsException
-
+from services.CidadeService import CidadeService
 
 class ProfessoresService:
 
@@ -48,7 +49,25 @@ class ProfessoresService:
         professores = [Professores(**d) for d in professores]
         return jsonify([c.to_dict() for c in professores]), 201
 
-    def buscar_todos_professores(self) -> list[Professores]:
+    def buscar_professores_tabela(self) -> list[dict]:
+        professores = self.leitura_exaustiva()
+        lista_professores: list[dict] = []
+
+        for professor in professores:
+            cidade = CidadeService.buscar_cidade(int(professor['codCidade']))
+            cidade_estado = cidade['descricao'] + ' - ' + cidade['estado']
+
+            professor_elemento = ListaProfessores(
+                int(professor['codigo']),
+                professor['nome'],
+                professor['endereco'],
+                professor['telefone'],
+                cidade_estado
+            )
+            lista_professores.append(professor_elemento.to_dict())
+        return lista_professores
+
+    def __buscar_todos_professores(self) -> list[Professores]:
         professores = []
         with open(self.path_dados, "r", encoding="utf-8") as arquivo:
             dados_json = json.load(arquivo)
@@ -65,7 +84,7 @@ class ProfessoresService:
         return professores
 
     @staticmethod
-    def buscar_professor(codigo: int) -> Professores:
+    def buscar_professor(codigo: int) -> Any:
         pasta_archives = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'archives')
         path_professores = os.path.join(pasta_archives, "Professores.txt")
         os.makedirs(pasta_archives, exist_ok=True)
@@ -78,11 +97,20 @@ class ProfessoresService:
                 professor_achado = professor
         if professor_achado is None:
             raise ObjectNotExistsException("Cidade não encontrada!")
-        return professor_achado
+        cidade = CidadeService.buscar_cidade(professor_achado['codCidade'])
+        info_cidade = {
+            "nome": cidade['descricao'],
+            "estado": cidade['estado'],
+        }
+        professor = {
+            "professor": professor_achado,
+            "cidade": info_cidade
+        }
+        return professor
 
     def excluir_professor(self, codigo: int) -> None:
         indices, raiz = self.carregar_arvore_binaria()
-        dados: List[Professores] = self.buscar_todos_professores()
+        dados: List[Professores] = self.__buscar_todos_professores()
 
         if not indices or not dados:
             return
@@ -140,7 +168,7 @@ class ProfessoresService:
         return tem
 
     def leitura_exaustiva(self):
-        dados = self.buscar_todos_professores()
+        dados = self.__buscar_todos_professores()
         indices = self.carregar_arvore_binaria()
         usados = set()
         dados_ordenados = []
@@ -156,5 +184,12 @@ class ProfessoresService:
                 dados_ordenados.append(dados[menor.index])
         return [professor.__dict__ for professor in dados_ordenados]
 
+    def buscar_professor_por_modalidade(self, cod_professor: int) -> Professores | None:
+        lista_professores: List[Professores] = self.__buscar_todos_professores()
+        for professor in lista_professores:
+            if professor.codigo == cod_professor:
+                return professor
+        return None
+
     def carregar_arvore_binaria(self) -> ArvoreBinaria:
-        return ArvoreBinaria.construir_arvore(self.buscar_todos_professores())
+        return ArvoreBinaria.construir_arvore(self.__buscar_todos_professores())

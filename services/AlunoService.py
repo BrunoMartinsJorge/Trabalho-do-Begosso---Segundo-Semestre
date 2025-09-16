@@ -8,6 +8,7 @@ from exceptions.ObjectNotExistsException import ObjectNotExistsException
 from models.Alunos import Alunos
 from models.ArvoresBinaria import ArvoreBinaria
 from exceptions.ObjectExistsException import ObjectExistsException
+from services.CidadeService import CidadeService
 
 
 class AlunoService:
@@ -66,7 +67,7 @@ class AlunoService:
         return alunos
 
     @staticmethod
-    def buscar_aluno(codigo: int) -> Alunos:
+    def buscar_aluno(codigo: int) -> Any:
         pasta_archives = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'archives')
         path_alunos = os.path.join(pasta_archives, "Alunos.txt")
         os.makedirs(pasta_archives, exist_ok=True)
@@ -79,7 +80,30 @@ class AlunoService:
                 aluno_achado = aluno
         if aluno_achado is None:
             raise ObjectNotExistsException("Aluno não encontrado!")
-        return aluno_achado
+        cidade = CidadeService.buscar_cidade(int(aluno_achado["codCidade"]))
+        imc = AlunoService.__calcular_imc(aluno_achado["peso"], aluno_achado["altura"])
+        info_ciadade = {
+            "nome": cidade['descricao'],
+            "estado": cidade['estado']
+        }
+        aluno = {
+            "aluno": aluno_achado,
+            "cidade": info_ciadade,
+            "imc": imc
+        }
+        return aluno
+
+    @staticmethod
+    def __calcular_imc(peso, altura) -> str:
+        imc: float = float(peso) / (float(altura) ** 2)
+        if imc < 18.5:
+            return f'Seu IMC = {imc:.2f} - Abaixo do peso'
+        elif 18.5 <= imc < 25:
+            return f'Seu IMC = {imc:.2f} - Peso normal'
+        elif 25 <= imc < 30:
+            return f'Seu IMC = {imc:.2f} - Sobrepeso'
+        else:
+            return f'Seu IMC = {imc:.2f} - Obesidade'
 
     def excluir_aluno(self, codigo: int) -> None:
         indices, raiz = self.carregar_arvore_binaria()
@@ -113,6 +137,7 @@ class AlunoService:
                 no.index = indices[min_index].index
                 no.direita = remover(no.direita, indices[min_index].info)
             return atual_index
+
         nova_raiz = remover(raiz, codigo)
         # Esses ':' servem substitui todos os elementos da lista existente com os novos elementos. Parecendo um ponteiro(Mesmo que em Pitão não tenha)
         dados[:] = [c for c in dados if c.codigo != codigo]

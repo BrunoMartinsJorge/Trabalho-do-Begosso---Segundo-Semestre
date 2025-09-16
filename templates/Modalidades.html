@@ -18,7 +18,7 @@
 {% for modalidade in modalidades %}
     <li>{{ modalidade }}</li>
 {% endfor %}
-<form method="POST" action="/cidades/cadastrar_cidade">
+<form method="POST" action="/modalidades/cadastrar_modalidade">
     <label>
         <input type="number" placeholder="Insira o código da cidade" id="codigo" name="codigo" required/>
     </label>
@@ -37,17 +37,23 @@
         <option value="valor3">Valor 3</option>
     </select>
 </label>
-<form method="GET" action="/cidades/buscar_cidade_por_codigo">
+<form method="GET" action="/modalidades/buscar_modalidade_por_codigo">
     <label>
         <input type="number" placeholder="Insira o código da cidade para buscar" id="codigo" name="codigo" required>
     </label>
     <input type="submit" value="Buscar Cidade"/>
 </form>
-<form method="POST" action="/cidades/apagar_cidades_por_codigo">
+<form method="POST" action="/modalidades/apagar_modalidade_por_codigo">
     <label>
         <input type="number" placeholder="Insira o código da cidade para apagar" id="codigo" name="codigo" required>
     </label>
     <input type="submit" value="Apagar Cidade"/>
+</form>
+<form method="GET" action="/modalidades/buscar_faturamento">
+    <label>
+        <input type="number" placeholder="Codigo modalidade calcular faturamento" id="codigo" name="codigo" required>
+    </label>
+    <input type="submit" value="Calcular Faturamento"/>
 </form>
 <input type="button" value="Leitura exaustiva" onClick="busca_exaustiva()"/>
 <ul id="lista-cidades"></ul>
@@ -57,7 +63,7 @@
     function busca_exaustiva() {
         const lista = document.getElementById("lista-cidades");
         lista.innerHTML = "";
-        fetch("http://127.0.0.1:5000/cidades/leitura_exaustiva")
+        fetch("http://127.0.0.1:5000/modalidades/leitura_exaustiva")
             .then(response => response.json())
             .then(data => {
                 const lista = document.getElementById("lista-cidades");

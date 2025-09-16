@@ -1,81 +1,99 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <title>Alunos</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='index.css') }}"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PowerOn Academia</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='icon.png') }}">
 </head>
 <body>
-<nav>
-    <ul>
-        <li><a href="{{ url_for('alunos_router') }}">Alunos</a></li>
-        <li><a href="{{ url_for('cidades_router') }}">Cidades</a></li>
-        <li><a href="{{ url_for('matriculas_router') }}">Matrículas</a></li>
-        <li><a href="{{ url_for('modalidades_router') }}">Modalidades</a></li>
-        <li><a href="{{ url_for('professores_router') }}">Professores</a></li>
-    </ul>
-</nav>
-{% for aluno in alunos %}
-    <li>{{ aluno }}</li>
-{% endfor %}
-<form method="POST" action="/alunos/cadastrar_aluno">
-    <label>
-        <input type="number" placeholder="Insira o código do aluno" id="codigo" name="codigo" required/>
-    </label>
-    <label>
-        <input type="text" placeholder="Insira o nome do aluno" id="nome" name="nome" required/>
-    </label>
-    <label>
-        <input type="number" placeholder="Insira o codigo da cidade" id="codCidade" name="codCidade" required/>
-    </label>
-    <label>
-        <input type="date" placeholder="Insira a data de nascimento" id="nascimento" name="nascimento" required/>
-    </label>
-    <label>
-        <input type="number" placeholder="Insira o peso" id="peso" name="peso" required/>
-    </label>
-    <label>
-        <input type="number" placeholder="Insira a altura" id="altura" name="altura" required/>
-    </label>
-    <input type="submit" value="Adicionar Cidade"/>
-</form>
-<label>
-    <select name="select">
-        <option value="valor1">Valor 1</option>
-        <option value="valor2" selected>Valor 2</option>
-        <option value="valor3">Valor 3</option>
-    </select>
-</label>
-<form method="GET" action="/alunos/buscar_aluno_por_codigo">
-    <label>
-        <input type="number" placeholder="Insira o código da cidade para buscar" id="codigo" name="codigo" required>
-    </label>
-    <input type="submit" value="Buscar Cidade"/>
-</form>
-<form method="POST" action="/alunos/apagar_alunos_por_codigo">
-    <label>
-        <input type="number" placeholder="Insira o código da cidade para apagar" id="codigo" name="codigo" required>
-    </label>
-    <input type="submit" value="Apagar Cidade"/>
-</form>
-<input type="button" value="Leitura exaustiva" onClick="busca_exaustiva()"/>
-<ul id="lista-alunos"></ul>
 
+<header>
+    <div class="header-container">
+        <div class="logo-container">
+            <img src="../static/icon.png" alt="Ícone da Academia PowerOn" class="logo">
+            <img src="../static/Logo.png" alt="Logo Academia PowerOn" class="logo-texto">
+        </div>
+        <nav>
+            <a href="{{ url_for('cidades_router') }}">Cidades</a>
+            <a href="{{ url_for('alunos_router') }}" class="active">Alunos</a>
+            <a href="{{ url_for('professores_router') }}">Professores</a>
+            <a href="{{ url_for('modalidades_router') }}">Modalidades</a>
+            <a href="{{ url_for('matriculas_router') }}">Matrículas</a>
+            <a href="{{ url_for('alunos_router') }}">Relatórios</a>
+        </nav>
+    </div>
+</header>
+
+<main class="container">
+    <div class="content-box">
+
+        <h2>Gestão de Alunos</h2>
+
+        <h3>Cadastrar Novo Aluno</h3>
+        <form id="alunos-form" action="https://localhost:8080/alunos/cadastrar_aluno" method="POST">
+            <div class="form-group">
+                <label for="aluno-codigo">Código:</label>
+                <input type="number" id="aluno-codigo" name="aluno-codigo" required>
+            </div>
+            <div class="form-group form-group-large">
+                <label for="aluno-nome">Nome Completo:</label>
+                <input type="text" id="aluno-nome" name="aluno-nome" required>
+            </div>
+            <div class="form-group">
+                <label for="aluno-cidade">Cidade:</label>
+                <select id="aluno-cidade" name="aluno-cidade" required>
+                    <option value="" disabled selected>Selecione...</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="aluno-nascimento">Data de Nascimento:</label>
+                <input type="date" id="aluno-nascimento" name="aluno-nascimento" required>
+            </div>
+            <div class="form-group">
+                <label for="aluno-peso">Peso (kg):</label>
+                <input type="number" id="aluno-peso" name="aluno-peso" step="0.1" required>
+            </div>
+            <div class="form-group">
+                <label for="aluno-altura">Altura (m):</label>
+                <input type="number" id="aluno-altura" name="aluno-altura" step="0.01" required>
+            </div>
+            <div class="form-group-full">
+                <button type="submit" class="btn btn-primary">Salvar Aluno</button>
+            </div>
+        </form>
+
+        <hr>
+
+        <h3>Consultar e Listar Alunos</h3>
+        <div class="area-busca">
+            <input type="number" id="busca" placeholder="Buscar por Código">
+            <button id="btn-buscar">Buscar</button>
+        </div>
+        <div id="resultado-busca-aluno" class="resultado-destaque hidden"></div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                <tr>
+                    <th>Cód.</th>
+                    <th>Nome</th>
+                    <th>Cidade</th>
+                    <th>Nascimento</th>
+                    <th>Ações</th>
+                </tr>
+                </thead>
+                <tbody id="alunos-tbody"></tbody>
+            </table>
+        </div>
+    </div>
+</main>
+
+<footer>
+    <p>Trabalho Prático - Estruturas de Arquivos Indexados &copy; 2025</p>
+</footer>
+
+<script src="../static/script.js"></script>
 </body>
-<script>
-    function busca_exaustiva() {
-        const lista = document.getElementById("lista-alunos");
-        lista.innerHTML = "";
-        fetch("http://127.0.0.1:5000/alunos/leitura_exaustiva")
-            .then(response => response.json())
-            .then(data => {
-                const lista = document.getElementById("lista-alunos");
-                data.forEach(cidade => {
-                    const li = document.createElement("li");
-                    li.textContent = `${cidade.codigo} - ${cidade.descricao} (${cidade.estado})`;
-                    lista.appendChild(li);
-                });
-            });
-    }
-</script>
 </html>

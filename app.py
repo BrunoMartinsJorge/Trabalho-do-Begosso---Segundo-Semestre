@@ -23,18 +23,14 @@ app.register_blueprint(professor_bp)
 register_error_handlers(app)
 
 @app.route('/')
-def formulario():
-    return render_template('index.html')
-
-@app.route('/alunos')
 def alunos_router():
     alunoService = AlunoService()
-    return render_template('Alunos.html', alunos=alunoService.buscar_todos_alunos())
+    return render_template('Alunos.html')
 
 @app.route('/cidades')
 def cidades_router():
     cidadesService = CidadeService()
-    return render_template('Cidades.html', cidades=cidadesService.buscar_todas_cidades(), arvores=cidadesService.carregar_arvore_binaria())
+    return render_template('Cidades.html')
 
 @app.route('/modalidades')
 def modalidades_router():
@@ -44,7 +40,7 @@ def modalidades_router():
 @app.route('/professores')
 def professores_router():
     professoresService = ProfessoresService()
-    return render_template('Professores.html', professores=professoresService.buscar_todos_professores())
+    return render_template('Professores.html')
 
 @app.route('/matriculas')
 def matriculas_router():

@@ -8,9 +8,10 @@ cidadeService = CidadeService()
 
 @cidade_bp.route("/cadastrar_cidade", methods=["POST"])
 def cadastrar_cidade():
-    codigo = request.form['codigo']
-    descricao = request.form['descricao']
-    estado = request.form['estado']
+    data = request.get_json()
+    codigo = data['codigo']
+    descricao = data['descricao']
+    estado = data['estado']
     return cidadeService.inserir_cidade(Cidades(int(codigo), descricao, estado))
 
 
@@ -22,7 +23,7 @@ def buscar_cidade_por_codigo():
 
 @cidade_bp.route("/apagar_cidades_por_codigo", methods=["POST"])
 def apagar_cidade_por_codigo():
-    codigo = request.form['codigo']
+    codigo = request.args.get("codigo")
     cidadeService.excluir_cidade(int(codigo))
     return "Cidade apagada com sucesso!"
 

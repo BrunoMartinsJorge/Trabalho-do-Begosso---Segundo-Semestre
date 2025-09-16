@@ -9,9 +9,10 @@ matriculaService = MatriculasService()
 @matriculas_bp.route("/cadastrar_matricula", methods=["POST"])
 def cadastrar_matricula():
     codigo = request.form['codigo']
-    descricao = request.form['descricao']
-    estado = request.form['estado']
-    return matriculaService.inserir_matricula(Matriculas(int(codigo), descricao, estado))
+    codAluno = request.form['codAluno']
+    codModalidade = request.form['codModalidade']
+    quantidadeAulas = request.form['quantidadeAulas']
+    return matriculaService.inserir_matricula(Matriculas(int(codigo), codAluno, codModalidade, quantidadeAulas))
 
 
 @matriculas_bp.route("/buscar_matricula_por_codigo", methods=["GET"])
@@ -20,7 +21,7 @@ def buscar_matricula_por_codigo():
     return matriculaService.buscar_matricula(int(codigo))
 
 
-@matriculas_bp.route("/apagar_matriculas_por_codigo", methods=["POST"])
+@matriculas_bp.route("/apagar_matricula_por_codigo", methods=["POST"])
 def apagar_matricula_por_codigo():
     codigo = request.form['codigo']
     matriculaService.excluir_matricula(int(codigo))

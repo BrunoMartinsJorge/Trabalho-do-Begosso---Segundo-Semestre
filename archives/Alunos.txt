@@ -30,5 +30,13 @@
         "nascimento": "1999-11-23",
         "peso": 60,
         "altura": 1
+    },
+    {
+        "codigo": 1,
+        "nome": "Arthur",
+        "codCidade": 12,
+        "nascimento": "1212-12-12",
+        "peso": 12,
+        "altura": 12
     }
 ]

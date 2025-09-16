@@ -4,10 +4,16 @@ from typing import Any, List
 
 from flask import jsonify
 
+from dto.ListaOrdenadaMatriculasDto import ListaOrdenadaMatriculasDto
+from exceptions.ModalityHasNoVacancies import ModalityHasNoVacancies
 from exceptions.ObjectNotExistsException import ObjectNotExistsException
 from models.Matriculas import Matriculas
 from models.ArvoresBinaria import ArvoreBinaria
 from exceptions.ObjectExistsException import ObjectExistsException
+from services.AlunoService import AlunoService
+from services.CidadeService import CidadeService
+from services.ModalidadesService import ModalidadesService
+from services.ProfessorService import ProfessoresService
 
 
 class MatriculasService:
@@ -24,11 +30,17 @@ class MatriculasService:
                 raise ObjectExistsException(f"Matricula com código {nova_matricula.codigo} já existe!")
 
     @staticmethod
+    def __verificar_se_modalidade_tem_vagas(id_modalidade: int):
+        modalidade = ModalidadesService.buscar_modalidades(id_modalidade)['modalidade']
+        if modalidade['totalMatriculas'] >= modalidade['limiteAlunos']:
+            raise ModalityHasNoVacancies(f"A modalidade: {modalidade['descricao']} não possui mais vagas!")
+
+    @staticmethod
     def inserir_matricula(nova_matricula: Matriculas) -> Any:
         pasta_archives = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'archives')
         path_matricula = os.path.join(pasta_archives, "Matriculas.txt")
         os.makedirs(pasta_archives, exist_ok=True)
-
+        MatriculasService.__verificar_se_modalidade_tem_vagas(nova_matricula.codModalidade)
         if os.path.exists(path_matricula):
             with open(path_matricula, "r", encoding="utf-8") as arquivo:
                 try:
@@ -45,8 +57,10 @@ class MatriculasService:
         with open(path_matricula, "w", encoding="utf-8") as arquivo:
             json.dump(matriculas, arquivo, indent=4, ensure_ascii=False)
 
-        matriculas = [Matriculas(**d) for d in matriculas]
-        return jsonify([c.to_dict() for c in matriculas]), 201
+        modalidadeService = ModalidadesService()
+
+        modalidadeService.atualizar_modalidade(nova_matricula.codModalidade, 'SOMAR')
+        return MatriculasService.buscar_matricula(nova_matricula.codigo)
 
     def buscar_todas_matriculas(self) -> list[Matriculas]:
         matriculas = []
@@ -64,7 +78,7 @@ class MatriculasService:
         return matriculas
 
     @staticmethod
-    def buscar_matricula(codigo: int) -> Matriculas:
+    def buscar_matricula(codigo: int) -> Any:
         pasta_archives = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'archives')
         path_matricula = os.path.join(pasta_archives, "Matriculas.txt")
         os.makedirs(pasta_archives, exist_ok=True)
@@ -77,11 +91,24 @@ class MatriculasService:
                 matricula_achada = matricula
         if matricula_achada is None:
             raise ObjectNotExistsException("Matricula não encontrado!")
-        return matricula_achada
+
+        retorno = {
+            "matricula": matricula_achada,
+            "infos": MatriculasService.__buscar_infos_matricula(int(matricula_achada['codAluno']),
+                                                                int(matricula_achada['codModalidade']),
+                                                                int(matricula_achada['quantidadeAulas']))
+        }
+        return retorno
 
     def excluir_matricula(self, codigo: int) -> None:
         indices, raiz = self.carregar_arvore_binaria()
         dados: List[Matriculas] = self.buscar_todas_matriculas()
+
+        matricula = None
+
+        for mat in dados:
+            if mat.codigo == codigo:
+                matricula = mat
 
         if not indices or not dados:
             return
@@ -111,6 +138,7 @@ class MatriculasService:
                 no.index = indices[min_index].index
                 no.direita = remover(no.direita, indices[min_index].info)
             return atual_index
+
         nova_raiz = remover(raiz, codigo)
         # Esses ':' servem substitui todos os elementos da lista existente com os novos elementos. Parecendo um ponteiro(Mesmo que em Pitão não tenha)
         dados[:] = [c for c in dados if c.codigo != codigo]
@@ -127,6 +155,8 @@ class MatriculasService:
         dados_json = [matricula.__dict__ for matricula in dados]
         with open(self.path_dados, "w", encoding="utf-8") as f:
             json.dump(dados_json, f, ensure_ascii=False, indent=4)
+        modalidadeService = ModalidadesService()
+        modalidadeService.atualizar_modalidade(matricula.codModalidade, 'SUBTRAIR')
         return nova_raiz
 
     def __ver_se_existe_na_lista(self, lista_codigo, codigo_atual):
@@ -136,6 +166,24 @@ class MatriculasService:
                 tem = True
                 break
         return tem
+
+    @staticmethod
+    def __buscar_infos_matricula(codAluno: int, codModalidade: int, qtdAulas: int) -> Any:
+        aluno = AlunoService.buscar_aluno(codAluno)
+        cidade_nome = CidadeService.buscar_cidade(int(aluno['aluno']['codCidade']))['descricao']
+
+        modalidade = ModalidadesService.buscar_modalidades(codModalidade)
+        valor = qtdAulas * float(modalidade['modalidade']['valorDaAula'])
+        aluno_info = {
+            "nome": aluno['aluno']['nome'],
+            "cidade": cidade_nome
+        }
+        info = {
+            "aluno": aluno_info,
+            "modalidade": modalidade['modalidade']['descricao'],
+            "valor": valor
+        }
+        return info
 
     def leitura_exaustiva(self):
         dados = self.buscar_todas_matriculas()
@@ -153,6 +201,30 @@ class MatriculasService:
                 usados.add(menor.info)
                 dados_ordenados.append(dados[menor.index])
         return [matricula.__dict__ for matricula in dados_ordenados]
+
+    @staticmethod
+    def buscar_matriculas_modalidades(cod_modalidade: int) -> List[Matriculas]:
+        matriculaService = MatriculasService()
+        matriculas = matriculaService.buscar_todas_matriculas()
+        matriculas_modalidade: List[Matriculas] = []
+        for matricula in matriculas:
+            if matricula.codModalidade == cod_modalidade:
+                matriculas_modalidade.append(matricula)
+        return matriculas_modalidade
+
+    @staticmethod
+    def listar_todas_matriculas() -> List[ListaOrdenadaMatriculasDto]:
+        lista: List[ListaOrdenadaMatriculasDto] = []
+        matriculas = MatriculasService.leitura_exaustiva(MatriculasService)
+        if len(matriculas) == 0:
+            return lista
+        for matricula in matriculas:
+            nome_professor: str = ProfessoresService.buscar_professor_por_modalidade(ProfessoresService, int(matricula["matricula"]["codModalidade"])).nome
+            elemento = ListaOrdenadaMatriculasDto(int(matricula["matricula"]["codigo"]),
+                                                  matricula["infos"]["aluno"]["nome"], matricula["infos"]["cidade"],
+                                                  matricula["infos"]["modalidade"], nome_professor, float(matricula["infos"]["valor"]))
+            lista.append(elemento)
+        return lista
 
     def carregar_arvore_binaria(self) -> ArvoreBinaria:
         return ArvoreBinaria.construir_arvore(self.buscar_todas_matriculas())

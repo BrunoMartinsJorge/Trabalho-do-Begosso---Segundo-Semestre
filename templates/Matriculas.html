@@ -18,15 +18,18 @@
 {% for matricula in matriculas %}
     <li>{{ matricula.codigo }}</li>
 {% endfor %}
-<form method="POST" action="/cidades/cadastrar_cidade">
+<form method="POST" action="/matriculas/cadastrar_matricula">
     <label>
         <input type="number" placeholder="Insira o código da cidade" id="codigo" name="codigo" required/>
     </label>
     <label>
-        <input type="text" placeholder="Insira o nome da cidade" id="descricao" name="descricao" required/>
+        <input type="number" placeholder="Insira o nome da cidade" id="codAluno" name="codAluno" required/>
     </label>
     <label>
-        <input type="text" placeholder="Insira o estado da cidade" id="estado" name="estado" required/>
+        <input type="number" placeholder="Insira o estado da cidade" id="codModalidade" name="codModalidade" required/>
+    </label>
+    <label>
+        <input type="number" placeholder="Insira o estado da cidade" id="quantidadeAulas" name="quantidadeAulas" required/>
     </label>
     <input type="submit" value="Adicionar Cidade"/>
 </form>
@@ -37,13 +40,13 @@
         <option value="valor3">Valor 3</option>
     </select>
 </label>
-<form method="GET" action="/cidades/buscar_cidade_por_codigo">
+<form method="GET" action="/matriculas/buscar_matricula_por_codigo">
     <label>
         <input type="number" placeholder="Insira o código da cidade para buscar" id="codigo" name="codigo" required>
     </label>
     <input type="submit" value="Buscar Cidade"/>
 </form>
-<form method="POST" action="/cidades/apagar_cidades_por_codigo">
+<form method="POST" action="/matriculas/apagar_matricula_por_codigo">
     <label>
         <input type="number" placeholder="Insira o código da cidade para apagar" id="codigo" name="codigo" required>
     </label>
@@ -57,7 +60,7 @@
     function busca_exaustiva() {
         const lista = document.getElementById("lista-cidades");
         lista.innerHTML = "";
-        fetch("http://127.0.0.1:5000/cidades/leitura_exaustiva")
+        fetch("http://127.0.0.1:5000/matriculas/leitura_exaustiva")
             .then(response => response.json())
             .then(data => {
                 const lista = document.getElementById("lista-cidades");

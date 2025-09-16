@@ -4,10 +4,13 @@ from typing import List, Any
 
 from flask import jsonify
 
+from dto.FaturamentoModalidadeDto import FaturamentoModalidadeDto
 from exceptions.ObjectExistsException import ObjectExistsException
 from exceptions.ObjectNotExistsException import ObjectNotExistsException
+from models import Matriculas
 from models.ArvoresBinaria import ArvoreBinaria
 from models.Modalidades import Modalidades
+from services.ProfessorService import ProfessoresService
 
 
 class ModalidadesService:
@@ -66,7 +69,7 @@ class ModalidadesService:
         return modalidades
 
     @staticmethod
-    def buscar_modalidades(codigo: int) -> Modalidades:
+    def buscar_modalidades(codigo: int) -> Any:
         pasta_archives = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'archives')
         path_modalidades = os.path.join(pasta_archives, "Modalidades.txt")
         os.makedirs(pasta_archives, exist_ok=True)
@@ -75,11 +78,50 @@ class ModalidadesService:
             modalidades = json.load(arquivo)
         modalidade_achada = None
         for modalidade in modalidades:
-            if codigo == int(modalidade['codigo']):
+            mod_codigo = int(modalidade['codigo'])
+            if int(codigo) == mod_codigo:
                 modalidade_achada = modalidade
+                break
         if modalidade_achada is None:
-            raise ObjectNotExistsException("Modalidade não encontrado!")
-        return modalidade_achada
+            raise ObjectNotExistsException("1 Modalidade não encontrado!")
+
+        modalidade = {
+            "modalidade": modalidade_achada,
+            "info": ModalidadesService.__informacoes_professor_modalidade(int(modalidade_achada['codProfessor']))
+        }
+        return modalidade
+
+    def atualizar_modalidade(self, idModalidade: int, tipo_operacao: str):
+        pasta_archives = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'archives')
+        path_modalidades = os.path.join(pasta_archives, "Modalidades.txt")
+        os.makedirs(pasta_archives, exist_ok=True)
+
+        try:
+            with open(path_modalidades, "r", encoding="utf-8") as arquivo:
+                modalidades = json.load(arquivo)
+        except (FileNotFoundError, json.JSONDecodeError):
+            modalidades = []
+
+        for i, mod in enumerate(modalidades):
+            if mod["codigo"] == int(idModalidade):
+                if tipo_operacao == "SOMAR":
+                    mod["totalMatriculas"] = int(mod["totalMatriculas"]) + 1
+                elif tipo_operacao == "SUBTRAIR":
+                    mod["totalMatriculas"] = max(0, int(mod["totalMatriculas"]) - 1)
+                modalidades[i] = mod
+                break
+
+        with open(path_modalidades, "w", encoding="utf-8") as arquivo:
+            json.dump(modalidades, arquivo, indent=4, ensure_ascii=False)
+
+    @staticmethod
+    def __informacoes_professor_modalidade(codigoProfessor: int):
+        professor = ProfessoresService.buscar_professor(codigoProfessor)
+        infos = {
+            "professor": professor['professor']['nome'],
+            "cidade": professor['cidade']['nome']
+        }
+        return infos
 
     def excluir_modalidade(self, codigo: int) -> None:
         indices, raiz = self.carregar_arvore_binaria()
@@ -113,6 +155,7 @@ class ModalidadesService:
                 no.index = indices[min_index].index
                 no.direita = remover(no.direita, indices[min_index].info)
             return atual_index
+
         nova_raiz = remover(raiz, codigo)
         # Esses ':' servem substitui todos os elementos da lista existente com os novos elementos. Parecendo um ponteiro(Mesmo que em Pitão não tenha)
         dados[:] = [c for c in dados if c.codigo != codigo]
@@ -155,6 +198,25 @@ class ModalidadesService:
                 usados.add(menor.info)
                 dados_ordenados.append(dados[menor.index])
         return [modalidade.__dict__ for modalidade in dados_ordenados]
+
+    @staticmethod
+    def faturamento_por_modalidade(codigo: int) -> FaturamentoModalidadeDto:
+        modalidade = ModalidadesService.buscar_modalidades(codigo)['modalidade']
+        informacoes_professor = ModalidadesService.__informacoes_professor_modalidade(codigo);
+        return FaturamentoModalidadeDto(modalidade['descricao'], informacoes_professor['professor'],
+                                        informacoes_professor['cidade'],
+                                        ModalidadesService.__calcular_faturamento(ModalidadesService, modalidade))
+
+    def __calcular_faturamento(self, modalidade: Any) -> float:
+        from services.MatriculasService import MatriculasService
+        matriculas_modalidade: List[Matriculas] = MatriculasService.buscar_matriculas_modalidades(int(modalidade['codigo']))
+        if not matriculas_modalidade:
+            return 0.0
+        valor_modalidade = modalidade['valorDaAula']
+        quantidade_aulas: int = 0
+        for matricula in matriculas_modalidade:
+            quantidade_aulas += matricula.quantidadeAulas
+        return quantidade_aulas * valor_modalidade
 
     def carregar_arvore_binaria(self) -> ArvoreBinaria:
         return ArvoreBinaria.construir_arvore(self.buscar_todas_modalidades())
