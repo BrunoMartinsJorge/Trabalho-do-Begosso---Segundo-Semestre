@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relatórios - PowerOn Gym</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='icon.png') }}">
+</head>
+<body>
+
+<header>
+    <div class="header-container">
+        <div class="logo-container">
+            <img src="../static/icon.png" alt="Ícone da Academia PowerOn" class="logo">
+            <img src="../static/Logo.png" alt="Logo Academia PowerOn" class="logo-texto">
+        </div>
+        <nav>
+            <a href="{{ url_for('cidades_router') }}">Cidades</a>
+            <a href="{{ url_for('alunos_router') }}">Alunos</a>
+            <a href="{{ url_for('professores_router') }}">Professores</a>
+            <a href="{{ url_for('modalidades_router') }}">Modalidades</a>
+            <a href="{{ url_for('matriculas_router') }}">Matrículas</a>
+            <a href="{{ url_for('relatorio_router') }}" class="active">Relatórios</a>
+        </nav>
+    </div>
+</header>
+
+<main class="container">
+    <div class="content-box">
+        <h2>Relatórios da Academia</h2>
+
+        <h3>Faturamento por Modalidade</h3>
+        <form id="form-faturamento">
+            <div class="form-group form-group-large">
+                <label for="faturamento-modalidade">Selecione a Modalidade:</label>
+                <select id="faturamento-modalidade" name="codigo_modalidade" required>
+                    <option value="" disabled selected>Selecione...</option>
+                </select>
+            </div>
+            <div class="form-group-full">
+                <button type="submit" class="btn btn-primary" id="btn-buscar">Gerar Relatório de Faturamento</button>
+            </div>
+        </form>
+        <div id="resultado-faturamento" class="resultado-destaque hidden">
+        </div>
+
+        <hr>
+
+        <h3>Relatório Geral de Matrículas</h3>
+        <div class="form-group-full">
+            <select id="modalidade-matriculas" name="codigo_modalidade" required>
+                <option value="" disabled selected>Selecione...</option>
+            </select>
+        </div>
+        <div class="form-group-full">
+            <button type="button" id="btn-relatorio-geral" class="btn btn-secondary">Listar Matrículas</button>
+        </div>
+
+
+        <div class="table-container">
+            <table>
+                <thead>
+                <tr>
+                    <th>Cód. Matrícula</th>
+                    <th>Nome do Aluno</th>
+                    <th>Cidade do Aluno</th>
+                    <th>Modalidade</th>
+                    <th>Professor</th>
+                    <th>Valor a Pagar</th>
+                </tr>
+                </thead>
+                <tbody id="relatorioGeralTbody">
+                </tbody>
+            </table>
+        </div>
+        <div id="relatorio-geral-totais" class="resultado-destaque hidden" style="margin-top: 1.5rem;">
+        </div>
+
+    </div>
+</main>
+
+<footer>
+    <p>Trabalho - Estruturas de Arquivos Indexados &copy; 2025</p>
+</footer>
+
+<script src="../static/script.js"></script>
+</body>
+</html>

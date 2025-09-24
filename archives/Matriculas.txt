@@ -24,12 +24,6 @@
         "quantidadeAulas": 9
     },
     {
-        "codigo": 6,
-        "codAluno": 1,
-        "codModalidade": 3,
-        "quantidadeAulas": 5
-    },
-    {
         "codigo": 7,
         "codAluno": 2,
         "codModalidade": 4,
@@ -52,11 +46,5 @@
         "codAluno": "2",
         "codModalidade": "2",
         "quantidadeAulas": "2"
-    },
-    {
-        "codigo": 10,
-        "codAluno": "1",
-        "codModalidade": "3",
-        "quantidadeAulas": "1"
     }
 ]

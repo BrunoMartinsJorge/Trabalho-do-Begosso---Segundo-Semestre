@@ -1,19 +1,11 @@
 [
     {
-        "codigo": 5,
-        "nome": "Pedro Almeida",
-        "codCidade": 5,
-        "nascimento": "1998-09-10",
-        "peso": 75,
-        "altura": 1
-    },
-    {
         "codigo": 3,
         "nome": "Carlos Souza",
         "codCidade": 3,
         "nascimento": "2001-02-15",
         "peso": 80,
-        "altura": 1
+        "altura": 1.0
     },
     {
         "codigo": 4,
@@ -21,7 +13,7 @@
         "codCidade": 4,
         "nascimento": "2002-07-30",
         "peso": 55,
-        "altura": 1
+        "altura": 1.0
     },
     {
         "codigo": 2,
@@ -29,7 +21,7 @@
         "codCidade": 2,
         "nascimento": "1999-11-23",
         "peso": 60,
-        "altura": 1
+        "altura": 1.0
     },
     {
         "codigo": 1,
@@ -37,6 +29,22 @@
         "codCidade": 12,
         "nascimento": "1212-12-12",
         "peso": 12,
-        "altura": 12
+        "altura": 12.0
+    },
+    {
+        "codigo": 5,
+        "nome": "Bruno",
+        "codCidade": 29,
+        "nascimento": "2006-06-12",
+        "peso": 89,
+        "altura": 1.84
+    },
+    {
+        "codigo": 6,
+        "nome": "Zauuul",
+        "codCidade": 30,
+        "nascimento": "2005-06-27",
+        "peso": 79,
+        "altura": 1.7
     }
 ]

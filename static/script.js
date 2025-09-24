@@ -1,41 +1,4 @@
 document.addEventListener("DOMContentLoaded", () => {
-    // SIMULAÇÃO DO BANCO DE DADOS (COMPARTILHADO ENTRE PÁGINAS)
-
-    let db = {
-        cidades: JSON.parse(localStorage.getItem("db_cidades")) || [
-            {codigo: 1, descricao: "Assis", estado: "SP"},
-            {codigo: 2, descricao: "Marília", estado: "SP"},
-        ],
-        alunos: JSON.parse(localStorage.getItem("db_alunos")) || [
-            {
-                codigo: 101,
-                nome: "Ana Souza",
-                codigo_cidade: 1,
-                nascimento: "2002-08-10",
-                peso: 60,
-                altura: 1.65,
-            },
-        ],
-        professores: JSON.parse(localStorage.getItem("db_professores")) || [
-            {
-                codigo: 51,
-                nome: "Ricardo Borges",
-                endereco: "Rua das Flores, 123",
-                telefone: "(18) 99999-1111",
-                codigo_cidade: 1,
-            },
-        ],
-    };
-
-    //Função para salvar o conteudo incluido:
-    function salvarDB() {
-        localStorage.setItem("db_cidades", JSON.stringify(db.cidades));
-        localStorage.setItem("db_alunos", JSON.stringify(db.alunos));
-        localStorage.setItem("db_professores", JSON.stringify(db.professores));
-    }
-
-    // FUNÇÕES COMPARTILHADAS
-
     //Função para adicionar as cidades salvas no select:
     function carregarCidadesEmSelect(selectId) {
         const selectElement = document.getElementById(selectId);
@@ -49,6 +12,33 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         })
     }
+
+    function carregarProfessoresEmSelect(selectId) {
+        const selectElement = document.getElementById(selectId);
+        if (!selectElement) return;
+
+        selectElement.innerHTML =
+            '<option value="" disabled selected>Selecione...</option>';
+        fetch("professores/listar_todos").then(resp => resp.json()).then((data) => {
+            data.forEach((professor) => {
+                selectElement.innerHTML += `<option value="${professor.codigo}">${professor.nome}</option>`;
+            });
+        })
+    }
+
+    function carregarModalidadesEmSelect(selectId) {
+        const selectElement = document.getElementById(selectId);
+        if (!selectElement) return;
+
+        selectElement.innerHTML =
+            '<option value="" disabled selected>Selecione...</option>';
+        fetch("modalidades/leitura_exaustiva").then(resp => resp.json()).then((data) => {
+            data.forEach((professor) => {
+                selectElement.innerHTML += `<option value="${professor.codigo}">${professor.nome}</option>`;
+            });
+        })
+    }
+
 
     // LÓGICA DA PÁGINA DE CIDADES
 
@@ -125,10 +115,9 @@ document.addEventListener("DOMContentLoaded", () => {
                     "Content-Type": "application/json"
                 },
             })
-                .then(response => response.json())  // RETORNAR!
+                .then(response => response.json())
                 .then(data => {
-                    console.log("Dados recebidos:", data);
-                    cidade = data;
+                    const cidade = data;
                     if (cidade) {
                         resultadoDiv.innerHTML = `
                         <strong> Cidade Encontrada:</strong><br>
@@ -172,23 +161,9 @@ document.addEventListener("DOMContentLoaded", () => {
         const alunosTbody = document.getElementById("alunos-tbody");
         const btnBuscar = document.getElementById("btn-buscar");
 
-        function calcularIMC(peso, altura) {
-            if (!peso || !altura) return "Dados de peso/altura incompletos.";
-            const imc = peso / (altura * altura);
-            const diagnostico =
-                imc < 18.5
-                    ? "Abaixo do peso"
-                    : imc < 24.9
-                        ? "Peso normal"
-                        : imc < 29.9
-                            ? "Sobrepeso"
-                            : "Obesidade";
-            return `IMC: ${imc.toFixed(2)} (${diagnostico})`;
-        }
-
         function renderizarAlunos() {
             alunosTbody.innerHTML = "";
-            fetch("/alunos/leitura_exaustiva", {
+            fetch("/alunos/buscar_todos", {
                 method: "GET",
                 headers: {
                     "Content-Type": "application/json"
@@ -197,17 +172,15 @@ document.addEventListener("DOMContentLoaded", () => {
                 .then(response => response.json())
                 .then(data => {
                     data.forEach((aluno) => {
-                        const cidadeDoAluno =
-                            db.cidades.find((c) => c.codigo === aluno.codigo_cidade)
-                                ?.descricao || "N/A";
+                        const dataNasc = aluno.dataNascimento
+                            ? formatDateLocal(aluno.dataNascimento)
+                            : "Data não informada";
                         alunosTbody.innerHTML += `
                     <tr>
                         <td>${aluno.codigo}</td>
                         <td>${aluno.nome}</td>
-                        <td>${aluno.codCidade}</td>
-                        <td>${new Date(
-                            aluno.nascimento + "T00:00:00"
-                        ).toLocaleDateString()}</td>
+                        <td>${aluno.cidade}</td>
+                        <td>${dataNasc}</td>
                         <td class="action-buttons">
                             <button class="btn-info" data-id="${
                             aluno.codigo
@@ -243,7 +216,6 @@ document.addEventListener("DOMContentLoaded", () => {
             })
                 .then(response => response.json())
                 .then(data => {
-                    console.log(data);
                     const lista = document.getElementById("lista-cidades");
                     data.forEach(cidade => {
                         const li = document.createElement("li");
@@ -267,9 +239,8 @@ document.addEventListener("DOMContentLoaded", () => {
                     "Content-Type": "application/json"
                 },
             })
-                .then(response => response.json())  // RETORNAR!
+                .then(response => response.json())
                 .then(data => {
-                    console.log("Dados recebidos:", data);
                     aluno = data;
                     if (aluno) {
                         resultadoDiv.innerHTML = `
@@ -305,15 +276,19 @@ document.addEventListener("DOMContentLoaded", () => {
                     .catch(error => console.error("Erro:", error));
             }
             if (button.matches(".btn-info")) {
-                const aluno = db.alunos.find((a) => a.codigo === id);
-                if (aluno) {
-                    alert(
-                        `Diagnóstico para ${aluno.nome}:\n${calcularIMC(
-                            aluno.peso,
-                            aluno.altura
-                        )}`
-                    );
-                }
+                fetch(`/alunos/calcular_imc?codigo=${id}`, {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                })
+                    .then(async data => {
+                        const aluno = await data.json();
+                        alert(
+                            `Diagnóstico para ${aluno.nome}:\n${aluno.imc}`
+                        );
+                    })
+                    .catch(error => console.error("Erro:", error));
             }
         });
 
@@ -439,4 +414,238 @@ document.addEventListener("DOMContentLoaded", () => {
         carregarCidadesEmSelect("professor-cidade");
         renderizarProfessores();
     }
+
+    const modalidadesPage = document.getElementById("modalidades-form");
+    if (modalidadesPage) {
+        const modalidadesTbody = document.getElementById("modalidades-tbody");
+        const btnBuscar = document.getElementById("btn-buscar");
+
+        function renderizarModalidades() {
+            modalidadesTbody.innerHTML = "";
+            fetch(`/modalidades/lista_tabela`, {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+            }).then(response => response.json()).then((data) => {
+                data.forEach((professor) => {
+                    modalidadesTbody.innerHTML += `
+                    <tr>
+                        <td>${professor.codigo}</td>
+                        <td>${professor.descricao}</td>
+                        <td>${professor.professor}</td>
+                        <td>${professor.valorAula}</td>
+                        <td>${professor.limite}</td>
+                        <td>${professor.totalMatriculados} Matriculado(s)</td>
+                        <td class="action-buttons">
+                            <button class="btn-delete" data-id="${professor.codigo}" title="Excluir">🗑️</button>
+                        </td>
+                    </tr>`;
+                })
+            });
+        }
+
+        modalidadesPage.addEventListener("submit", (e) => {
+            e.preventDefault();
+            const formElements = e.target.elements;
+            const codigo = parseInt(formElements["modalidade-codigo"].value);
+            const resultadoDiv = document.getElementById("resultado-busca-modalidade");
+            resultadoDiv.classList.remove("hidden");
+            const novaModalidade = {
+                codigo,
+                descricao: formElements["modalidade-descricao"].value,
+                professor: formElements["modalidade-professor"].value,
+                valorAula: formElements["modalidade-valor"].value,
+                limite: parseInt(formElements["modalidade-limite"].value),
+            };
+            fetch("/modalidades/cadastrar_modalidade", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(novaModalidade)
+            })
+                .then(async response => {
+                    const data = await response.json();
+                    if (!response.ok) {
+                        resultadoDiv.innerHTML = `❌ Professor com código #${
+                            codigo || "inválido"
+                        } já existe.`;
+                        throw new Error(data.erro);
+                    }
+                    modalidadesPage.reset();
+                    renderizarModalidades();
+                })
+                .catch(error => {
+                    console.error("Erro:", error);
+                });
+        });
+
+        btnBuscar.addEventListener("click", () => {
+            const id = parseInt(document.getElementById("busca").value);
+            let professor;
+            const resultadoDiv = document.getElementById("resultado-busca-modalidade");
+            resultadoDiv.classList.remove("hidden");
+
+            fetch(`/modalidades/buscar_modalidade_por_codigo?codigo=${id}`, {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+            })
+                .then(response => response.json())
+                .then(data => {
+                    modalidade = data
+                    if (modalidade) {
+                        resultadoDiv.innerHTML = `
+                    <strong> Modalidade Encontrada:</strong><br>
+                    <strong>Código:</strong> #${modalidade.modalidade.codigo}<br>
+                    <strong>Descrição:</strong> ${modalidade.modalidade.descricao}<br>
+                    <strong>Professor:</strong> ${modalidade.info.professor} - ${modalidade.info.cidade}<br>
+                    <strong>Valor da Aula:</strong> R$ ${modalidade.modalidade.valorDaAula}<br>
+                    <strong>Limite de Alunos:</strong> ${modalidade.modalidade.limiteAlunos}<br>
+                    <strong>Total de Matriculas:</strong> ${modalidade.modalidade.totalMatriculas}<br>
+                 `;
+                    } else {
+                        resultadoDiv.innerHTML = `❌ Professor com código #${
+                            id || "inválido"
+                        } não encontrado.`;
+                    }
+                });
+        });
+
+        modalidadesTbody.addEventListener("click", (e) => {
+            const deleteButton = e.target.closest(".btn-delete");
+            if (deleteButton) {
+                const id = parseInt(deleteButton.dataset.id);
+                fetch(`/modalidades/apagar_modalidades_por_codigo?codigo=${id}`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                })
+                    .then(data => {
+                        renderizarModalidades();
+                    })
+                    .catch(error => console.error("Erro:", error));
+            }
+        });
+
+        carregarProfessoresEmSelect("modalidade-professor");
+        renderizarModalidades();
+    }
+
+    const relatorioPage = document.getElementById("form-faturamento");
+    if (relatorioPage) {
+        const modalidadesSelect = document.getElementById("faturamento-modalidade");
+        const modalidadesMatriculasSelect = document.getElementById("modalidade-matriculas");
+        const resultadoFaturamento = document.getElementById("resultado-faturamento");
+        const btnRelatorioGeral = document.getElementById("btn-relatorio-geral");
+        const relatorioGeralTbody = document.getElementById("relatorioGeralTbody");
+        const relatorioGeralTotais = document.getElementById("relatorio-geral-totais");
+
+        // Carregar modalidades no select
+        function carregarModalidadesEmSelect() {
+            modalidadesSelect.innerHTML = `<option value="" disabled selected>Selecione...</option>`;
+            modalidadesMatriculasSelect.innerHTML = `<option value="" disabled selected>Selecione...</option>`;
+            fetch("/modalidades/lista_tabela", {
+                method: "GET",
+                headers: {"Content-Type": "application/json"},
+            })
+                .then(response => response.json())
+                .then(data => {
+                    data.forEach(modalidade => {
+                        modalidadesSelect.innerHTML += `
+                        <option value="${modalidade.codigo}">
+                            ${modalidade.descricao} - Prof. ${modalidade.professor}
+                        </option>
+                    `;
+                        modalidadesMatriculasSelect.innerHTML += `
+                        <option value="${modalidade.codigo}">
+                            ${modalidade.descricao} - Prof. ${modalidade.professor}
+                        </option>
+                    `;
+                    });
+                })
+                .catch(error => console.error("Erro ao carregar modalidades:", error));
+        }
+
+        // Relatório de faturamento por modalidade
+        relatorioPage.addEventListener("submit", (e) => {
+            e.preventDefault();
+            const codigo = modalidadesSelect.value;
+
+            if (!codigo) return;
+
+            fetch(`/modalidades/buscar_faturamento?codigo=${codigo}`, {
+                method: "GET",
+                headers: {"Content-Type": "application/json"},
+            })
+                .then(response => response.json())
+                .then(data => {
+                    resultadoFaturamento.classList.remove("hidden");
+                    resultadoFaturamento.innerHTML = `
+                    <h4>📊 Relatório de Faturamento</h4>
+                    <p><strong>Modalidade:</strong> ${data.faturamento.descricao}</p>
+                    <p><strong>Nome do Professor:</strong> ${data.faturamento.nome_professor}</p>
+                    <p><strong>Cidade do Professor:</strong> ${data.faturamento.cidade_professor}</p>
+                    <p><strong>Faturamento Total:</strong> R$ ${data.faturamento.valor_faturado}</p>
+                `;
+                })
+                .catch(error => {
+                    console.error("Erro ao gerar relatório:", error);
+                    resultadoFaturamento.classList.remove("hidden");
+                    resultadoFaturamento.innerHTML = `❌ Erro ao gerar relatório.`;
+                });
+        });
+
+        // Relatório geral de matrículas
+        btnRelatorioGeral.addEventListener("click", (e) => {
+            e.preventDefault(); // evita recarregar a página
+
+            const codigo = modalidadesMatriculasSelect.value; // usa o select correto
+            if (!codigo) return;
+
+            fetch(`/relatorio/listar-relatorio-matriculas?codigo=${codigo}`, {
+                method: "GET",
+                headers: {"Content-Type": "application/json"},
+            })
+                .then(response => response.json())
+                .then(data => {
+                    relatorioGeralTbody.innerHTML = "";
+                    let total = 0;
+
+                    data.forEach(matricula => {
+                        relatorioGeralTbody.innerHTML += `
+                    <tr>
+                        <td>${matricula.codigo}</td>
+                        <td>${matricula.aluno}</td>
+                        <td>${matricula.cidade}</td>
+                        <td>${matricula.modalidade}</td>
+                        <td>${matricula.professor}</td>
+                        <td>R$ ${matricula.valor}</td>
+                    </tr>
+                `;
+                        total += matricula.valor;
+                    });
+
+                    relatorioGeralTotais.classList.remove("hidden");
+                    relatorioGeralTotais.innerHTML = `
+                <h4>📈 Totais</h4>
+                <p><strong>Total de Matrículas:</strong> ${data.length}</p>
+                <p><strong>Faturamento Total:</strong> R$ ${total}</p>
+            `;
+                })
+                .catch(error => console.error("Erro ao carregar relatório geral:", error));
+        });
+
+        // Inicializar selects
+        carregarModalidadesEmSelect();
+    }
 });
+
+function formatDateLocal(iso) {
+    if (!iso) return '';
+    const [year, month, day] = iso.split('-');
+    return new Date(year, month - 1, day).toLocaleDateString('pt-BR');
+}

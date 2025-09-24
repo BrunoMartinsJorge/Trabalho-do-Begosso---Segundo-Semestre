@@ -4,6 +4,7 @@ from controllers.CidadesController import cidade_bp
 from controllers.AlunoController import aluno_bp
 from controllers.MatriculasController import matriculas_bp
 from controllers.ModalidadesController import modalidades_bp
+from controllers.RelatorioController import relatorio_bp
 from controllers.ProfessorController import professor_bp
 from exceptions.ExceptionHandler import register_error_handlers
 from services.AlunoService import AlunoService
@@ -19,6 +20,7 @@ app.register_blueprint(aluno_bp)
 app.register_blueprint(matriculas_bp)
 app.register_blueprint(modalidades_bp)
 app.register_blueprint(professor_bp)
+app.register_blueprint(relatorio_bp)
 
 register_error_handlers(app)
 
@@ -47,5 +49,8 @@ def matriculas_router():
     matriculasService = MatriculasService()
     return render_template('Matriculas.html', matriculas=matriculasService.buscar_todas_matriculas())
 
+@app.route('/relatorios')
+def relatorio_router():
+    return render_template('relatorios.html')
 if __name__ == '__main__':
     app.run(debug=True)

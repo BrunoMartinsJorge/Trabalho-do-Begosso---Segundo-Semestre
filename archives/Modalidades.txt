@@ -3,15 +3,15 @@
         "codigo": 3,
         "descricao": "Judô",
         "codProfessor": 3,
-        "valorDaAula": 60.0,
+        "valorDaAula": 60,
         "limiteAlunos": 10,
-        "totalMatriculas": 2
+        "totalMatriculas": 0
     },
     {
         "codigo": 5,
         "descricao": "Basquete",
-        "codProfessor": 5,
-        "valorDaAula": 55.0,
+        "codProfessor": 4,
+        "valorDaAula": 55,
         "limiteAlunos": 18,
         "totalMatriculas": 2
     },
@@ -19,7 +19,7 @@
         "codigo": 4,
         "descricao": "Ballet",
         "codProfessor": 4,
-        "valorDaAula": 80.0,
+        "valorDaAula": 80,
         "limiteAlunos": 12,
         "totalMatriculas": 2
     },
@@ -27,7 +27,7 @@
         "codigo": 2,
         "descricao": "Natação",
         "codProfessor": 2,
-        "valorDaAula": 70.0,
+        "valorDaAula": 70,
         "limiteAlunos": 15,
         "totalMatriculas": 4
     },
@@ -35,7 +35,7 @@
         "codigo": 1,
         "descricao": "Futebol",
         "codProfessor": 1,
-        "valorDaAula": 50.0,
+        "valorDaAula": 50,
         "limiteAlunos": 20,
         "totalMatriculas": 2
     }

@@ -27,6 +27,7 @@ def apagar_matricula_por_codigo():
     matriculaService.excluir_matricula(int(codigo))
     return "Matricula apagada com sucesso!"
 
-@matriculas_bp.route("/leitura_exaustiva", methods=["GET"])
-def leitura_exaustiva():
-    return matriculaService.leitura_exaustiva()
+@matriculas_bp.route("/listar_todos", methods=["GET"])
+def listar_todos():
+    lista = matriculaService.buscar_tabela_matriculas()
+    return jsonify([dto.__dict__ for dto in lista])

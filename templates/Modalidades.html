@@ -1,78 +1,98 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <title>Modalidades</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='index.css') }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestão de Modalidades - PowerOn Gym</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='icon.png') }}">
 </head>
 <body>
-<nav>
-    <ul>
-        <li><a href="{{ url_for('alunos_router') }}">Alunos</a></li>
-        <li><a href="{{ url_for('cidades_router') }}">Cidades</a></li>
-        <li><a href="{{ url_for('matriculas_router') }}">Matrículas</a></li>
-        <li><a href="{{ url_for('modalidades_router') }}">Modalidades</a></li>
-        <li><a href="{{ url_for('professores_router') }}">Professores</a></li>
-    </ul>
-</nav>
-{% for modalidade in modalidades %}
-    <li>{{ modalidade }}</li>
-{% endfor %}
-<form method="POST" action="/modalidades/cadastrar_modalidade">
-    <label>
-        <input type="number" placeholder="Insira o código da cidade" id="codigo" name="codigo" required/>
-    </label>
-    <label>
-        <input type="text" placeholder="Insira o nome da cidade" id="descricao" name="descricao" required/>
-    </label>
-    <label>
-        <input type="text" placeholder="Insira o estado da cidade" id="estado" name="estado" required/>
-    </label>
-    <input type="submit" value="Adicionar Cidade"/>
-</form>
-<label>
-    <select name="select">
-        <option value="valor1">Valor 1</option>
-        <option value="valor2" selected>Valor 2</option>
-        <option value="valor3">Valor 3</option>
-    </select>
-</label>
-<form method="GET" action="/modalidades/buscar_modalidade_por_codigo">
-    <label>
-        <input type="number" placeholder="Insira o código da cidade para buscar" id="codigo" name="codigo" required>
-    </label>
-    <input type="submit" value="Buscar Cidade"/>
-</form>
-<form method="POST" action="/modalidades/apagar_modalidade_por_codigo">
-    <label>
-        <input type="number" placeholder="Insira o código da cidade para apagar" id="codigo" name="codigo" required>
-    </label>
-    <input type="submit" value="Apagar Cidade"/>
-</form>
-<form method="GET" action="/modalidades/buscar_faturamento">
-    <label>
-        <input type="number" placeholder="Codigo modalidade calcular faturamento" id="codigo" name="codigo" required>
-    </label>
-    <input type="submit" value="Calcular Faturamento"/>
-</form>
-<input type="button" value="Leitura exaustiva" onClick="busca_exaustiva()"/>
-<ul id="lista-cidades"></ul>
 
+<header>
+    <div class="header-container">
+        <div class="logo-container">
+            <img src="../static/icon.png" alt="Ícone da Academia PowerOn" class="logo">
+            <img src="../static/Logo.png" alt="Logo Academia PowerOn" class="logo-texto">
+        </div>
+        <nav>
+            <a href="{{ url_for('cidades_router') }}">Cidades</a>
+            <a href="{{ url_for('alunos_router') }}">Alunos</a>
+            <a href="{{ url_for('professores_router') }}">Professores</a>
+            <a href="{{ url_for('modalidades_router') }}" class="active">Modalidades</a>
+            <a href="{{ url_for('matriculas_router') }}">Matrículas</a>
+            <a href="{{ url_for('relatorio_router') }}">Relatórios</a>
+        </nav>
+    </div>
+</header>
+
+<main class="container">
+    <div class="content-box">
+
+        <h2>Gestão de Modalidades</h2>
+
+        <h3>Cadastrar Nova Modalidade</h3>
+        <form id="modalidades-form">
+            <div class="form-group">
+                <label for="modalidade-codigo">Código:</label>
+                <input type="number" id="modalidade-codigo" name="modalidade-codigo" required>
+            </div>
+            <div class="form-group form-group-large">
+                <label for="modalidade-descricao">Descrição:</label>
+                <input type="text" id="modalidade-descricao" name="modalidade-descricao" required>
+            </div>
+            <div class="form-group">
+                <label for="modalidade-professor">Professor:</label>
+                <select id="modalidade-professor" name="modalidade-professor" required>
+                    <option value="codigo" disabled selected>Selecione...</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="modalidade-valor">Valor da Aula (R$):</label>
+                <input type="number" id="modalidade-valor" name="modalidade-valor" step="0.01" required>
+            </div>
+            <div class="form-group">
+                <label for="modalidade-limite">Limite de Alunos:</label>
+                <input type="number" id="modalidade-limite" name="modalidade-limite" required>
+            </div>
+            <div class="form-group-full">
+                <button type="submit" class="btn btn-primary">Salvar Modalidade</button>
+            </div>
+        </form>
+
+        <hr>
+
+        <h3>Consultar e Listar Modalidades</h3>
+        <div class="area-busca">
+            <input type="number" id="busca" placeholder="Buscar por Código">
+            <button id="btn-buscar">Buscar</button>
+        </div>
+        <div id="resultado-busca-modalidade" class="resultado-destaque hidden"></div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                <tr>
+                    <th>Cód.</th>
+                    <th>Descrição</th>
+                    <th>Professor</th>
+                    <th>Valor Aula</th>
+                    <th>Limite</th>
+                    <th>Matriculados</th>
+                    <th>Ações</th>
+                </tr>
+                </thead>
+                <tbody id="modalidades-tbody">
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+
+<footer>
+    <p>Trabalho Prático - Estruturas de Arquivos Indexados &copy; 2025</p>
+</footer>
+
+<script src="../static/script.js"></script>
 </body>
-<script>
-    function busca_exaustiva() {
-        const lista = document.getElementById("lista-cidades");
-        lista.innerHTML = "";
-        fetch("http://127.0.0.1:5000/modalidades/leitura_exaustiva")
-            .then(response => response.json())
-            .then(data => {
-                const lista = document.getElementById("lista-cidades");
-                data.forEach(cidade => {
-                    const li = document.createElement("li");
-                    li.textContent = `${cidade.codigo} - ${cidade.descricao} (${cidade.estado})`;
-                    lista.appendChild(li);
-                });
-            });
-    }
-</script>
 </html>

@@ -84,7 +84,7 @@ class ProfessoresService:
             if codigo == int(professor['codigo']):
                 professor_achado = professor
         if professor_achado is None:
-            raise ObjectNotExistsException("Cidade não encontrada!")
+            raise ObjectNotExistsException("Professor não encontrado com código " + str(codigo))
         cidade = CidadeService.buscar_cidade(professor_achado['codCidade'])
         info_cidade = {
             "nome": cidade['descricao'],

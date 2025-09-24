@@ -7,17 +7,22 @@ modalidades_bp = Blueprint("modalidade", __name__, url_prefix="/modalidades")
 
 modalidadesService = ModalidadesService()
 
+@modalidades_bp.route("/lista_tabela", methods=["GET"])
+def lista_tabela():
+    modalidadesService = ModalidadesService()
+    lista = modalidadesService.buscar_todos_para_tabela()
+    return jsonify([dto.__dict__ for dto in lista])
 
 @modalidades_bp.route("/cadastrar_modalidade", methods=["POST"])
 def cadastrar_modalidade():
-    codigo = request.form['codigo']
-    descricao = request.form['descricao']
-    codProfessor = request.form['codProfessor']
-    valorDaAula = request.form['valorDaAula']
-    limiteAlunos = request.form['limiteAlunos']
-    totalMatriculas = request.form['totalMatriculas']
+    data = request.get_json()
+    codigo = data['codigo']
+    descricao = data['descricao']
+    codProfessor = data['professor']
+    valorDaAula = data['valorAula']
+    limiteAlunos = data['limite']
     return modalidadesService.inserir_modalidade(
-        Modalidades(int(codigo), descricao, codProfessor, valorDaAula, limiteAlunos, totalMatriculas))
+        Modalidades(int(codigo), descricao, codProfessor, valorDaAula, limiteAlunos, 0))
 
 
 @modalidades_bp.route("/buscar_modalidade_por_codigo", methods=["GET"])
@@ -28,7 +33,7 @@ def buscar_modalidade_por_codigo():
 
 @modalidades_bp.route("/apagar_modalidades_por_codigo", methods=["POST"])
 def apagar_modalidade_por_codigo():
-    codigo = request.form['codigo']
+    codigo = request.args.get('codigo')
     modalidadesService.excluir_modalidade(int(codigo))
     return "Matricula apagada com sucesso!"
 

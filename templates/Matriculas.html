@@ -1,75 +1,239 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <title>Matriculas</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='index.css') }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestão de Matrículas - PowerOn Gym</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='icon.png') }}">
 </head>
 <body>
-<nav>
-    <ul>
-        <li><a href="{{ url_for('alunos_router') }}">Alunos</a></li>
-        <li><a href="{{ url_for('cidades_router') }}">Cidades</a></li>
-        <li><a href="{{ url_for('matriculas_router') }}">Matrículas</a></li>
-        <li><a href="{{ url_for('modalidades_router') }}">Modalidades</a></li>
-        <li><a href="{{ url_for('professores_router') }}">Professores</a></li>
-    </ul>
-</nav>
-{% for matricula in matriculas %}
-    <li>{{ matricula.codigo }}</li>
-{% endfor %}
-<form method="POST" action="/matriculas/cadastrar_matricula">
-    <label>
-        <input type="number" placeholder="Insira o código da cidade" id="codigo" name="codigo" required/>
-    </label>
-    <label>
-        <input type="number" placeholder="Insira o nome da cidade" id="codAluno" name="codAluno" required/>
-    </label>
-    <label>
-        <input type="number" placeholder="Insira o estado da cidade" id="codModalidade" name="codModalidade" required/>
-    </label>
-    <label>
-        <input type="number" placeholder="Insira o estado da cidade" id="quantidadeAulas" name="quantidadeAulas" required/>
-    </label>
-    <input type="submit" value="Adicionar Cidade"/>
-</form>
-<label>
-    <select name="select">
-        <option value="valor1">Valor 1</option>
-        <option value="valor2" selected>Valor 2</option>
-        <option value="valor3">Valor 3</option>
-    </select>
-</label>
-<form method="GET" action="/matriculas/buscar_matricula_por_codigo">
-    <label>
-        <input type="number" placeholder="Insira o código da cidade para buscar" id="codigo" name="codigo" required>
-    </label>
-    <input type="submit" value="Buscar Cidade"/>
-</form>
-<form method="POST" action="/matriculas/apagar_matricula_por_codigo">
-    <label>
-        <input type="number" placeholder="Insira o código da cidade para apagar" id="codigo" name="codigo" required>
-    </label>
-    <input type="submit" value="Apagar Cidade"/>
-</form>
-<input type="button" value="Leitura exaustiva" onClick="busca_exaustiva()"/>
-<ul id="lista-cidades"></ul>
 
-</body>
+<header>
+    <div class="header-container">
+        <div class="logo-container">
+            <img src="../static/icon.png" alt="Ícone da Academia PowerOn" class="logo">
+            <img src="../static/Logo.png" alt="Logo Academia PowerOn" class="logo-texto">
+        </div>
+        <nav>
+            <a href="{{ url_for('cidades_router') }}">Cidades</a>
+            <a href="{{ url_for('alunos_router') }}">Alunos</a>
+            <a href="{{ url_for('professores_router') }}">Professores</a>
+            <a href="{{ url_for('modalidades_router') }}">Modalidades</a>
+            <a href="{{ url_for('matriculas_router') }}" class="active">Matrículas</a>
+            <a href="{{ url_for('relatorio_router') }}">Relatórios</a>
+        </nav>
+    </div>
+</header>
+
+<main class="container">
+    <div class="content-box">
+
+        <h2>Gestão de Matrículas</h2>
+
+        <h3>Realizar Nova Matrícula</h3>
+        <form id="matriculas-form">
+            <div class="form-group">
+                <label for="matricula-codigo">Código da Matrícula:</label>
+                <input type="number" id="matricula-codigo" name="matricula-codigo" required>
+            </div>
+            <div class="form-group form-group-large">
+                <label for="matricula-aluno">Aluno:</label>
+                <select id="matricula-aluno" name="matricula-aluno" required>
+                    <option value="" disabled selected>Selecione o Aluno...</option>
+                </select>
+            </div>
+            <div class="form-group form-group-large">
+                <label for="matricula-modalidade">Modalidade:</label>
+                <select id="matricula-modalidade" name="matricula-modalidade" required>
+                    <option value="" disabled selected>Selecione a Modalidade...</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="matricula-aulas">Quantidade de Aulas:</label>
+                <input type="number" id="matricula-aulas" name="matricula-aulas" required>
+            </div>
+            <div class="form-group-full">
+                <button type="submit" class="btn btn-primary">Salvar Matrícula</button>
+            </div>
+        </form>
+
+        <hr>
+
+        <h3>Consultar e Listar Matrículas</h3>
+        <div class="area-busca">
+            <input type="number" id="busca" placeholder="Buscar por Código da Matrícula">
+            <button id="btn-buscar">Buscar</button>
+        </div>
+        <div id="resultado-busca-matricula" class="resultado-destaque hidden"></div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                <tr>
+                    <th>Cód. Matrícula</th>
+                    <th>Nome do Aluno</th>
+                    <th>Descrição da Modalidade</th>
+                    <th>Qtd. Aulas</th>
+                    <th>Valor a Pagar</th>
+                    <th>Ações</th>
+                </tr>
+                </thead>
+                <tbody id="matriculas-tbody">
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+
+<footer>
+    <p>Trabalho Prático - Estruturas de Arquivos Indexados &copy; 2025</p>
+</footer>
+
 <script>
-    function busca_exaustiva() {
-        const lista = document.getElementById("lista-cidades");
-        lista.innerHTML = "";
-        fetch("http://127.0.0.1:5000/matriculas/leitura_exaustiva")
-            .then(response => response.json())
-            .then(data => {
-                const lista = document.getElementById("lista-cidades");
-                data.forEach(cidade => {
-                    const li = document.createElement("li");
-                    li.textContent = `${cidade.codigo} - ${cidade.descricao} (${cidade.estado})`;
-                    lista.appendChild(li);
+    document.addEventListener('DOMContentLoaded', () => {
+
+        //Seleção dos Elementos da Página
+        const form = document.getElementById('matriculas-form');
+        const tbody = document.getElementById('matriculas-tbody');
+        const btnBuscar = document.getElementById('btn-buscar');
+        const buscaInput = document.getElementById('busca');
+        const resultadoBuscaDiv = document.getElementById('resultado-busca-matricula');
+        const alunoSelect = document.getElementById('matricula-aluno');
+        const modalidadeSelect = document.getElementById('matricula-modalidade');
+
+
+        //Busca a lista de alunos no back-end
+        async function carregarAlunos() {
+            try {
+                const response = await fetch('/alunos/buscar_todos');
+                const alunos = await response.json();
+                alunos.sort((a, b) => a.nome.localeCompare(b.nome)).forEach(aluno => {
+                    alunoSelect.innerHTML += `<option value="${aluno.codigo}">${aluno.nome}</option>`;
                 });
-            });
-    }
+            } catch (error) {
+                console.error('Erro ao buscar alunos:', error);
+            }
+        }
+
+        //Busca a lista de modalidades no back-end
+        async function carregarModalidades() {
+            try {
+                const response = await fetch('/modalidades/leitura_exaustiva');
+                const modalidades = await response.json();
+                modalidades.sort((a, b) => a.descricao.localeCompare(b.descricao)).forEach(mod => {
+                    modalidadeSelect.innerHTML += `<option value="${mod.codigo}">${mod.descricao}</option>`;
+                });
+            } catch (error) {
+                console.error('Erro ao buscar modalidades:', error);
+            }
+        }
+
+        //leitura exaustiva e renderização da tabela.
+        async function renderizarTabela() {
+            try {
+                const response = await fetch('/matriculas/listar_todos');
+                const matriculas = await response.json();
+                tbody.innerHTML = '';
+
+                matriculas.sort((a, b) => a.codigo - b.codigo).forEach(matricula => {
+                    tbody.innerHTML += `
+                    <tr>
+                        <td>${matricula.codigo}</td>
+                        <td>${matricula.nomeAluno || 'N/A'}</td>
+                        <td>${matricula.descricao || 'N/A'}</td>
+                        <td>${matricula.qtdAulas} Aula(s)</td>
+                        <td>R$ ${parseFloat(matricula.valorPagar).toFixed(2)}</td>
+                        <td class="action-buttons">
+                            <button class="btn-delete" data-id="${matricula.codigo}" title="Excluir">🗑️</button>
+                        </td>
+                    </tr>`;
+                });
+            } catch (error) {
+                console.error('Erro ao buscar matrículas:', error);
+                tbody.innerHTML = `<tr><td colspan="6">Erro ao carregar dados.</td></tr>`;
+            }
+        }
+
+        // Adicionar nova matricula
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(form);
+            try {
+                const response = await fetch('/matriculas/cadastrar_matricula', {
+                    method: 'POST',
+                    body: formData
+                });
+                const result = await response.json();
+                if (response.ok) {
+                    form.reset();
+                    await renderizarTabela();
+                } else {
+                    alert(`Erro: ${result.message || 'Não foi possível matricular.'}`);
+                }
+            } catch (error) {
+                console.error('Erro de rede:', error);
+                alert('Erro de conexão ao tentar matricular.');
+            }
+        });
+
+        // Buscar matricula por código
+        btnBuscar.addEventListener('click', async () => {
+            const codigo = buscaInput.value;
+            if (!codigo) return;
+            resultadoBuscaDiv.classList.remove('hidden');
+            try {
+                const response = await fetch(`/matriculas/buscar_matricula_por_codigo?codigo=${codigo}`);
+                const matricula = await response.json();
+                if (response.ok) {
+                    resultadoBuscaDiv.innerHTML = `
+                    <strong>➡️ Matrícula Encontrada:</strong><br>
+                    <strong>Código:</strong> #${matricula.codigo}<br>
+                    <strong>Aluno:</strong> ${matricula.nomeAluno || 'N/A'}<br>
+                    <strong>Modalidade:</strong> ${matricula.descricao || 'N/A'}<br>
+                    <strong>Valor Total:</strong> R$ ${parseFloat(matricula.valorPagar).toFixed(2)}
+                `;
+                } else {
+                    resultadoBuscaDiv.innerHTML = `❌ ${matricula.message || 'Matrícula não encontrada.'}`;
+                }
+            } catch (error) {
+                console.error('Erro de rede:', error);
+                resultadoBuscaDiv.innerHTML = `❌ Erro de conexão ao buscar.`;
+            }
+        });
+
+
+        // Excluir matricula
+        tbody.addEventListener('click', async (e) => {
+            const deleteButton = e.target.closest('.btn-delete');
+            if (deleteButton) {
+                const id = deleteButton.dataset.id;
+                if (confirm(`Tem certeza que deseja excluir a matrícula de código #${id}?`)) {
+                    const formData = new FormData();
+                    formData.append('codigo', id);
+                    try {
+                        const response = await fetch('/matriculas/apagar_matricula_por_codigo', {
+                            method: 'POST',
+                            body: formData
+                        });
+                        if (response.ok) {
+                            await renderizarTabela();
+                        } else {
+                            const errorData = await response.json();
+                            alert(`Erro: ${errorData.message || 'Não foi possível excluir.'}`);
+                        }
+                    } catch (error) {
+                        console.error('Erro de rede:', error);
+                        alert('Erro de conexão ao tentar excluir.');
+                    }
+                }
+            }
+        });
+
+        carregarAlunos();
+        carregarModalidades();
+        renderizarTabela();
+    });
 </script>
+</body>
 </html>

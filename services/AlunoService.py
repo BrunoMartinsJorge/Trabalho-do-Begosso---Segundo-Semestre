@@ -4,6 +4,7 @@ from typing import Any, List
 
 from flask import jsonify
 
+from dto.ListaAlunosDto import ListaAlunos
 from exceptions.ObjectNotExistsException import ObjectNotExistsException
 from models.Alunos import Alunos
 from models.ArvoresBinaria import ArvoreBinaria
@@ -23,6 +24,30 @@ class AlunoService:
         for aluno in alunos:
             if novo_aluno.codigo == int(aluno['codigo']):
                 raise ObjectExistsException(f"Aluno com código {novo_aluno.codigo} já existe!")
+
+    def calcular_imc(self, codigo: int) -> Any:
+        aluno = self.buscar_aluno(codigo)
+        resposta = {
+            "nome": aluno['aluno']['nome'],
+            "imc": aluno['imc']
+        }
+        return resposta
+
+    def buscar_alunos_tabela(self) -> list[dict]:
+        alunos = self.leitura_exaustiva()
+        lista_alunos: list[dict] = []
+
+        for aluno in alunos:
+            cidade = CidadeService.buscar_cidade(int(aluno['codCidade']))
+            cidade_estado = cidade['descricao'] + ' - ' + cidade['estado']
+            aluno_elemento = ListaAlunos(
+                int(aluno['codigo']),
+                aluno['nome'],
+                aluno['nascimento'],
+                cidade_estado
+            )
+            lista_alunos.append(aluno_elemento.to_dict())
+        return lista_alunos
 
     @staticmethod
     def inserir_aluno(novo_aluno: Alunos) -> Any:
@@ -79,7 +104,7 @@ class AlunoService:
             if codigo == int(aluno['codigo']):
                 aluno_achado = aluno
         if aluno_achado is None:
-            raise ObjectNotExistsException("Aluno não encontrado!")
+            raise ObjectNotExistsException("Aluno não encontrado com ID " + codigo)
         cidade = CidadeService.buscar_cidade(int(aluno_achado["codCidade"]))
         imc = AlunoService.__calcular_imc(aluno_achado["peso"], aluno_achado["altura"])
         info_ciadade = {

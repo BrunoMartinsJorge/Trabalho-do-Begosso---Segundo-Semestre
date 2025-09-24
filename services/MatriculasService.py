@@ -4,6 +4,8 @@ from typing import Any, List
 
 from flask import jsonify
 
+from dto.ListaAlunosDto import ListaAlunos
+from dto.ListaMatriculasDto import ListaMatriculasDto
 from dto.ListaOrdenadaMatriculasDto import ListaOrdenadaMatriculasDto
 from exceptions.ModalityHasNoVacancies import ModalityHasNoVacancies
 from exceptions.ObjectNotExistsException import ObjectNotExistsException
@@ -78,7 +80,7 @@ class MatriculasService:
         return matriculas
 
     @staticmethod
-    def buscar_matricula(codigo: int) -> Any:
+    def buscar_matricula(codigo: int) -> ListaMatriculasDto:
         pasta_archives = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'archives')
         path_matricula = os.path.join(pasta_archives, "Matriculas.txt")
         os.makedirs(pasta_archives, exist_ok=True)
@@ -91,14 +93,18 @@ class MatriculasService:
                 matricula_achada = matricula
         if matricula_achada is None:
             raise ObjectNotExistsException("Matricula não encontrado!")
-
-        retorno = {
-            "matricula": matricula_achada,
-            "infos": MatriculasService.__buscar_infos_matricula(int(matricula_achada['codAluno']),
-                                                                int(matricula_achada['codModalidade']),
-                                                                int(matricula_achada['quantidadeAulas']))
-        }
-        return retorno
+        infos = MatriculasService.__buscar_infos_matricula(int(matricula_achada['codAluno']),
+                                                           int(matricula_achada['codModalidade']),
+                                                           int(matricula_achada['quantidadeAulas']))
+        retorno = ListaMatriculasDto(
+            codigo,
+            infos['aluno']['nome'],
+            infos['modalidade'],
+            matricula_achada['quantidadeAulas'],
+            float(infos['valor'])
+        )
+        print(retorno)
+        return retorno.to_dict()
 
     def excluir_matricula(self, codigo: int) -> None:
         indices, raiz = self.carregar_arvore_binaria()
@@ -171,7 +177,6 @@ class MatriculasService:
     def __buscar_infos_matricula(codAluno: int, codModalidade: int, qtdAulas: int) -> Any:
         aluno = AlunoService.buscar_aluno(codAluno)
         cidade_nome = CidadeService.buscar_cidade(int(aluno['aluno']['codCidade']))['descricao']
-
         modalidade = ModalidadesService.buscar_modalidades(codModalidade)
         valor = qtdAulas * float(modalidade['modalidade']['valorDaAula'])
         aluno_info = {
@@ -206,12 +211,31 @@ class MatriculasService:
     def buscar_matriculas_modalidades(cod_modalidade: int) -> List[Matriculas]:
         matriculaService = MatriculasService()
         matriculas = matriculaService.leitura_exaustiva()
-        print(matriculas)
         matriculas_modalidade: List[Matriculas] = []
         for matricula in matriculas:
             if int(matricula['codModalidade']) == cod_modalidade:
                 matriculas_modalidade.append(matricula)
         return matriculas_modalidade
+
+    @staticmethod
+    def buscar_tabela_matriculas() -> List[Any]:
+        matriculaService = MatriculasService()
+        matriculas = matriculaService.leitura_exaustiva()
+        listaDto: List[ListaMatriculasDto] = []
+        for matricula in matriculas:
+            nomeAluno = AlunoService.buscar_aluno(int(matricula['codAluno']))
+            infor = matriculaService.__buscar_infos_matricula(int(matricula['codAluno']),
+                                                              int(matricula['codModalidade']),
+                                                              int(matricula['quantidadeAulas']))
+            matriculaDto = ListaMatriculasDto(
+                int(matricula['codigo']),
+                nomeAluno['aluno']['nome'],
+                infor['modalidade'],
+                int(matricula['quantidadeAulas']),
+                float(infor['valor'])
+            )
+            listaDto.append(matriculaDto)
+        return listaDto
 
     @staticmethod
     def listar_todas_matriculas() -> List[ListaOrdenadaMatriculasDto]:
@@ -220,10 +244,12 @@ class MatriculasService:
         if len(matriculas) == 0:
             return lista
         for matricula in matriculas:
-            nome_professor: str = ProfessoresService.buscar_professor_por_modalidade(ProfessoresService, int(matricula["matricula"]["codModalidade"])).nome
+            nome_professor: str = ProfessoresService.buscar_professor_por_modalidade(ProfessoresService, int(
+                matricula["matricula"]["codModalidade"])).nome
             elemento = ListaOrdenadaMatriculasDto(int(matricula["matricula"]["codigo"]),
                                                   matricula["infos"]["aluno"]["nome"], matricula["infos"]["cidade"],
-                                                  matricula["infos"]["modalidade"], nome_professor, float(matricula["infos"]["valor"]))
+                                                  matricula["infos"]["modalidade"], nome_professor,
+                                                  float(matricula["infos"]["valor"]))
             lista.append(elemento)
         return lista
 

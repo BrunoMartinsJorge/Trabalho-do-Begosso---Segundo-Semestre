@@ -5,6 +5,7 @@ from typing import List, Any
 from flask import jsonify
 
 from dto.FaturamentoModalidadeDto import FaturamentoModalidadeDto
+from dto.ListaModalidadesDto import ListaModalidadesDto
 from exceptions.ObjectExistsException import ObjectExistsException
 from exceptions.ObjectNotExistsException import ObjectNotExistsException
 from models import Matriculas
@@ -25,6 +26,26 @@ class ModalidadesService:
         for modalidade in Modalidades:
             if nova_modalidade.codigo == int(modalidade['codigo']):
                 raise ObjectExistsException(f"Modalidade com código {nova_modalidade.codigo} já existe!")
+
+    @staticmethod
+    def buscar_todos_para_tabela() -> List[ListaModalidadesDto]:
+        service = ModalidadesService()
+        listaModalidades = service.leitura_exaustiva()
+        listaDto: List[ListaModalidadesDto] = []
+        for modalidade in listaModalidades:
+            professor = ProfessoresService.buscar_professor(int(modalidade['codProfessor']))
+            professor_cidade = professor['professor']['nome'] + ' - ' + professor['cidade']['nome']
+            dto = ListaModalidadesDto(
+                int(modalidade['codigo']),
+                modalidade['descricao'],
+                professor_cidade,
+                float(modalidade['valorDaAula']),
+                modalidade['limiteAlunos'],
+                modalidade['totalMatriculas']
+            )
+            listaDto.append(dto)
+        return listaDto
+
 
     @staticmethod
     def inserir_modalidade(nova_modalidade: Modalidades) -> Any:
@@ -210,7 +231,6 @@ class ModalidadesService:
     def __calcular_faturamento(self, modalidade: Any) -> float:
         from services.MatriculasService import MatriculasService
         matriculas_modalidade: List[Matriculas] = MatriculasService.buscar_matriculas_modalidades(int(modalidade['codigo']))
-        print(matriculas_modalidade)
         if not matriculas_modalidade:
             return 0.0
         valor_modalidade = modalidade['valorDaAula']
