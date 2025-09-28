@@ -8,10 +8,12 @@ matriculaService = MatriculasService()
 
 @matriculas_bp.route("/cadastrar_matricula", methods=["POST"])
 def cadastrar_matricula():
-    codigo = request.form['codigo']
-    codAluno = request.form['codAluno']
-    codModalidade = request.form['codModalidade']
-    quantidadeAulas = request.form['quantidadeAulas']
+    data = request.get_json()
+    print(data)
+    codigo = data['codigo']
+    codAluno = data['codAluno']
+    codModalidade = data['codModalidade']
+    quantidadeAulas = data['qtdAulas']
     return matriculaService.inserir_matricula(Matriculas(int(codigo), codAluno, codModalidade, quantidadeAulas))
 
 

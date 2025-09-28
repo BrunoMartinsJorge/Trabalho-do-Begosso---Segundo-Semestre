@@ -46,5 +46,11 @@
         "codAluno": "2",
         "codModalidade": "2",
         "quantidadeAulas": "2"
+    },
+    {
+        "codigo": 10,
+        "codAluno": "7",
+        "codModalidade": "6",
+        "quantidadeAulas": "10"
     }
 ]

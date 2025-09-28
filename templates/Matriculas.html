@@ -158,18 +158,27 @@
         // Adicionar nova matricula
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const formData = new FormData(form);
+            const novaMatricula = {
+                codigo: form['matricula-codigo'].value,
+                codAluno: form["matricula-aluno"].value,
+                codModalidade: form["matricula-modalidade"].value,
+                qtdAulas: form["matricula-aulas"].value,
+            };
+            console.log(form)
             try {
                 const response = await fetch('/matriculas/cadastrar_matricula', {
                     method: 'POST',
-                    body: formData
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(novaMatricula)
                 });
                 const result = await response.json();
                 if (response.ok) {
                     form.reset();
                     await renderizarTabela();
                 } else {
-                    alert(`Erro: ${result.message || 'Não foi possível matricular.'}`);
+                    alert(`Erro: ${result.erro || 'Não foi possível matricular.'}`);
                 }
             } catch (error) {
                 console.error('Erro de rede:', error);

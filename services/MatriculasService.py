@@ -25,6 +25,7 @@ class MatriculasService:
         self.pasta_archives = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'archives')
         os.makedirs(self.pasta_archives, exist_ok=True)
         self.path_dados = os.path.join(self.pasta_archives, "matriculas.txt")
+        self.alunoService = AlunoService()
 
     def __verificar_se_codigo_existe(self, matriculas: List[Any], nova_matricula: Matriculas) -> None:
         for matricula in matriculas:
@@ -103,7 +104,6 @@ class MatriculasService:
             matricula_achada['quantidadeAulas'],
             float(infos['valor'])
         )
-        print(retorno)
         return retorno.to_dict()
 
     def excluir_matricula(self, codigo: int) -> None:
@@ -117,7 +117,7 @@ class MatriculasService:
                 matricula = mat
 
         if not indices or not dados:
-            return
+            return None
 
         def encontrar_minimo(index):
             while indices[index].esquerda != -1:

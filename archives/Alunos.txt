@@ -46,5 +46,13 @@
         "nascimento": "2005-06-27",
         "peso": 79,
         "altura": 1.7
+    },
+    {
+        "codigo": 7,
+        "nome": "Carlos",
+        "codCidade": 1,
+        "nascimento": "1212-12-12",
+        "peso": 78,
+        "altura": 1.82
     }
 ]

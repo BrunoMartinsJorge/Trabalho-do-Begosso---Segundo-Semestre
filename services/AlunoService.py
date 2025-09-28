@@ -19,6 +19,8 @@ class AlunoService:
         self.pasta_archives = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'archives')
         os.makedirs(self.pasta_archives, exist_ok=True)
         self.path_dados = os.path.join(self.pasta_archives, "alunos.txt")
+        self.cidadeService = CidadeService()
+        self.cidadeService = CidadeService()
 
     def __verificar_se_codigo_existe(self, alunos: List[Any], novo_aluno: Alunos) -> None:
         for aluno in alunos:
