@@ -11,6 +11,7 @@ from models.Professores import Professores
 from exceptions.ObjectExistsException import ObjectExistsException
 from services.CidadeService import CidadeService
 
+
 class ProfessoresService:
 
     def __init__(self):
@@ -27,22 +28,31 @@ class ProfessoresService:
     @staticmethod
     def inserir_professor(novo_professor: Professores) -> Any:
         pasta_archives = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'archives')
-        path_professores = os.path.join(pasta_archives, "Professores.txt")
+        path_professores = os.path.join(pasta_archives, "professores.txt")  # padronizado em minúsculo
         os.makedirs(pasta_archives, exist_ok=True)
-        professores = ProfessoresService.__buscar_todos_professores()
-        ProfessoresService.__verificar_se_codigo_existe(ProfessoresService, professores, novo_professor)
-        professores.append(novo_professor.to_dict())
+        if os.path.exists(path_professores):
+            with open(path_professores, "r", encoding="utf-8") as arquivo:
+                try:
+                    professores_json = json.load(arquivo)
+                except json.JSONDecodeError:
+                    professores_json = []
+        else:
+            professores_json = []
+        for p in professores_json:
+            if novo_professor.codigo == int(p["codigo"]):
+                raise ObjectExistsException(f"Professor com código {novo_professor.codigo} já existe!")
+        professores_json.append(novo_professor.to_dict())
         with open(path_professores, "w", encoding="utf-8") as arquivo:
-            json.dump(professores, arquivo, indent=4, ensure_ascii=False)
-        professores = [Professores(**d) for d in professores]
-        return jsonify([c.to_dict() for c in professores]), 201
+            json.dump(professores_json, arquivo, indent=4, ensure_ascii=False)
+
+        return jsonify(professores_json), 201
 
     def buscar_professores_tabela(self) -> list[dict]:
         professores = self.leitura_exaustiva()
         lista_professores: list[dict] = []
 
         for professor in professores:
-            cidade = CidadeService.buscar_cidade(int(professor['codCidade']))
+            cidade = CidadeService.buscar_cidade(CidadeService, int(professor['codCidade']))
             cidade_estado = cidade['descricao'] + ' - ' + cidade['estado']
 
             professor_elemento = ListaProfessores(
@@ -85,7 +95,7 @@ class ProfessoresService:
                 professor_achado = professor
         if professor_achado is None:
             raise ObjectNotExistsException("Professor não encontrado com código " + str(codigo))
-        cidade = CidadeService.buscar_cidade(professor_achado['codCidade'])
+        cidade = CidadeService.buscar_cidade(CidadeService, professor_achado['codCidade'])
         info_cidade = {
             "nome": cidade['descricao'],
             "estado": cidade['estado'],

@@ -7,7 +7,6 @@ professor_bp = Blueprint("professor", __name__, url_prefix="/professores")
 
 professor = ProfessoresService()
 
-
 @professor_bp.route("/cadastrar_profesor", methods=["POST"])
 def cadastrar_profesor():
     data = request.get_json()

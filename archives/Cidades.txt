@@ -148,5 +148,10 @@
         "codigo": 30,
         "descricao": "Assis",
         "estado": "SP"
+    },
+    {
+        "codigo": 31,
+        "descricao": "São José dos Campos",
+        "estado": "SP"
     }
 ]

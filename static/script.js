@@ -252,7 +252,7 @@ document.addEventListener("DOMContentLoaded", () => {
                             resultadoDiv.innerHTML = `
                     <strong> Aluno Encontrado:</strong><br>
                     <strong>Código:</strong> #${aluno.aluno.codigo} - ${aluno.aluno.nome}<br>
-                    <strong>Cidade:</strong> ${aluno.cidade.descricao} - ${aluno.cidade.estado}<br>
+                    <strong>Cidade:</strong> ${aluno.cidade.nome} - ${aluno.cidade.estado}<br>
                     <strong>Diagnóstico Corporal:</strong> ${aluno.imc}
                 `;
                         } else {

@@ -5,7 +5,7 @@ class Cidades:
         self.estado = str(estado)
 
     def __str__(self):
-        return f"Codigo: {self.codigo}, Descricao: {self.descricao}, Estado: {self.estado}"
+        return f"codigo: {self.codigo}, descricao: {self.descricao}, estado: {self.estado}"
 
     def __repr__(self):
         return f"Cidade(codigo={self.codigo}, descricao='{self.descricao}', estado='{self.estado}')"

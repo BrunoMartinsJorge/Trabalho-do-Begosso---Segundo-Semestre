@@ -62,5 +62,13 @@
         "nascimento": "1212-12-12",
         "peso": 12,
         "altura": 12.0
+    },
+    {
+        "codigo": 9,
+        "nome": "Izabela",
+        "codCidade": 31,
+        "nascimento": "1212-12-12",
+        "peso": 1,
+        "altura": 10.0
     }
 ]

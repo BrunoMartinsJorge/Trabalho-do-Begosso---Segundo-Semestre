@@ -26,5 +26,12 @@
         "endereco": "Rua A, 123",
         "telefone": "11987654321",
         "codCidade": 1
+    },
+    {
+        "codigo": 11,
+        "nome": "11",
+        "endereco": "11",
+        "telefone": "11",
+        "codCidade": 1
     }
 ]
