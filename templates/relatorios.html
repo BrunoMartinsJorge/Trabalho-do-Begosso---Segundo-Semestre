@@ -31,18 +31,12 @@
         <h2>Relatórios da Academia</h2>
 
         <h3>Faturamento por Modalidade</h3>
-        <form id="form-faturamento">
-            <div class="form-group form-group-large">
-                <label for="faturamento-modalidade">Selecione a Modalidade:</label>
-                <select id="faturamento-modalidade" name="codigo_modalidade" required>
-                    <option value="" disabled selected>Selecione...</option>
-                </select>
-            </div>
-            <div class="form-group-full">
-                <button type="submit" class="btn btn-primary" id="btn-buscar">Gerar Relatório de Faturamento</button>
-            </div>
-        </form>
-        <div id="resultado-faturamento" class="resultado-destaque hidden">
+        <h3>Consultar e Listar Modalidades</h3>
+        <div class="area-busca">
+            <input type="number" id="busca" placeholder="Buscar por Código">
+            <button id="btn-buscar">Buscar</button>
+        </div>
+        <div id="resultado-busca-modalidade" class="resultado-destaque hidden"></div>
         </div>
 
         <hr>
