@@ -12,7 +12,7 @@ def cadastrar_cidade():
     codigo = data['codigo']
     descricao = data['descricao']
     estado = data['estado']
-    return cidadeService.inserir_cidade(Cidades(int(codigo), descricao, estado))
+    return jsonify(cidadeService.inserir_cidade(Cidades(int(codigo), descricao, estado)))
 
 
 @cidade_bp.route("/buscar_cidade_por_codigo", methods=["GET"])
@@ -25,7 +25,7 @@ def buscar_cidade_por_codigo():
 def apagar_cidade_por_codigo():
     codigo = request.args.get("codigo")
     cidadeService.excluir_cidade(int(codigo))
-    return "Cidade apagada com sucesso!"
+    return jsonify("Cidade apagada com sucesso!")
 
 @cidade_bp.route("/leitura_exaustiva", methods=["GET"])
 def leitura_exaustiva():

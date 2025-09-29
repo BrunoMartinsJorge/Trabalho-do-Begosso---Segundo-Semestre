@@ -252,7 +252,7 @@ document.addEventListener("DOMContentLoaded", () => {
                             resultadoDiv.innerHTML = `
                     <strong> Aluno Encontrado:</strong><br>
                     <strong>Código:</strong> #${aluno.aluno.codigo} - ${aluno.aluno.nome}<br>
-                    <strong>Cidade:</strong> ${aluno.cidade.nome} - ${aluno.cidade.estado}<br>
+                    <strong>Cidade:</strong> ${aluno.cidade.descricao} - ${aluno.cidade.estado}<br>
                     <strong>Diagnóstico Corporal:</strong> ${aluno.imc}
                 `;
                         } else {
@@ -611,44 +611,6 @@ document.addEventListener("DOMContentLoaded", () => {
                         resultadoFaturamento.classList.remove("hidden");
                         resultadoFaturamento.innerHTML = `❌ Erro ao gerar relatório.`;
                     });
-            });
-
-            // Relatório geral de matrículas
-            btnRelatorioGeral.addEventListener("click", (e) => {
-                e.preventDefault(); // evita recarregar a página
-
-                const codigo = modalidadesMatriculasSelect.value; // usa o select correto
-                if (!codigo) return;
-
-                fetch(`/relatorio/listar-relatorio-matriculas?codigo=${codigo}`, {
-                    method: "GET",
-                    headers: {"Content-Type": "application/json"},
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        relatorioGeralTbody.innerHTML = "";
-                        let total = 0;
-
-                        data.forEach(matricula => {
-                            relatorioGeralTbody.innerHTML += `
-                    <tr>
-                        <td>${matricula.codigo}</td>
-                        <td>${matricula.nomeAluno}</td>
-                        <td>${matricula.cidadeAluno}</td>
-                        <td>${matricula.modalidade}</td>
-                        <td>${matricula.professor}</td>
-                        <td>R$ ${matricula.valorPagar}</td>
-                    </tr>
-                `;
-                        });
-                        relatorioGeralTotais.classList.remove("hidden");
-                        relatorioGeralTotais.innerHTML = `
-                <h4>📈 Totais</h4>
-                <p><strong>Total de Matrículas:</strong> ${data.length}</p>
-                <p><strong>Faturamento Total:</strong> R$ ${calcularFaturamentoModalidade(data)}</p>
-            `;
-                    })
-                    .catch(error => console.error("Erro ao carregar relatório geral:", error));
             });
 
             // Inicializar selects

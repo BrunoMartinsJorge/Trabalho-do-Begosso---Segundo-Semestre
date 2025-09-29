@@ -1,89 +1,80 @@
 import json
 import os
-from typing import Any, List
-
-from flask import jsonify
+from typing import List, Optional, Any
 
 from exceptions.ObjectNotExistsException import ObjectNotExistsException
+from exceptions.ObjectExistsException import ObjectExistsException
 from models.ArvoresBinaria import ArvoreBinaria
 from models.Cidades import Cidades
-from exceptions.ObjectExistsException import ObjectExistsException
 
 
 class CidadeService:
-
     def __init__(self):
         self.arvore_binaria: List[ArvoreBinaria] = []
-        self.pasta_archives = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'archives')
+        self.pasta_archives = os.path.join(
+            os.path.dirname(os.path.abspath(__file__)), "..", "archives"
+        )
         os.makedirs(self.pasta_archives, exist_ok=True)
-        self.path_dados = os.path.join(self.pasta_archives, "cidades.txt")
+        self.path_cidades = os.path.join(self.pasta_archives, "cidades.txt")
 
-    def __verificar_se_codigo_existe(self, cidades: List[Any], nova_cidade: Cidades) -> None:
-        for cidade in cidades:
-            if nova_cidade.codigo == int(cidade['codigo']):
-                raise ObjectExistsException(f"Cidade com código {nova_cidade.codigo} já existe!")
+    def __ler_arquivo(self) -> List[dict]:
+        if not os.path.exists(self.path_cidades):
+            return []
+        try:
+            with open(self.path_cidades, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except json.JSONDecodeError:
+            return []
 
-    @staticmethod
-    def inserir_cidade(nova_cidade: Cidades) -> Any:
-        pasta_archives = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'archives')
-        path_cidades = os.path.join(pasta_archives, "Cidades.txt")
-        os.makedirs(pasta_archives, exist_ok=True)
+    def __salvar_arquivo(self, cidades: List[dict]) -> None:
+        with open(self.path_cidades, "w", encoding="utf-8") as f:
+            json.dump(cidades, f, indent=4, ensure_ascii=False)
 
-        if os.path.exists(path_cidades):
-            with open(path_cidades, "r", encoding="utf-8") as arquivo:
-                try:
-                    cidades = json.load(arquivo)
-                except json.JSONDecodeError:
-                    cidades = []
-        else:
-            cidades = []
+    def __verificar_se_codigo_existe(
+        self, cidades: List[dict], nova_cidade: Cidades
+    ) -> None:
+        if any(nova_cidade.codigo == int(c["codigo"]) for c in cidades):
+            raise ObjectExistsException(
+                f"Cidade com código {nova_cidade.codigo} já existe!"
+            )
 
-        CidadeService.__verificar_se_codigo_existe(CidadeService, cidades, nova_cidade)
+    def inserir_cidade(self, nova_cidade: Cidades) -> str:
+        cidades = self.__ler_arquivo()
+        self.__verificar_se_codigo_existe(cidades, nova_cidade)
 
         cidades.append(nova_cidade.to_dict())
+        self.__salvar_arquivo(cidades)
 
-        with open(path_cidades, "w", encoding="utf-8") as arquivo:
-            json.dump(cidades, arquivo, indent=4, ensure_ascii=False)
+        return "Cidade Cadastrada!"
 
-        cidades = [Cidades(**d) for d in cidades]
-        return jsonify([c.to_dict() for c in cidades]), 201
-
-    def buscar_todas_cidades(self) -> list[Cidades]:
-        cidades = []
-        with open(self.path_dados, "r", encoding="utf-8") as arquivo:
-            dados_json = json.load(arquivo)
-
-        for d in dados_json:
-            cidade = Cidades(
+    def buscar_todas_cidades(self) -> List[Cidades]:
+        dados_json = self.__ler_arquivo()
+        return [
+            Cidades(
                 codigo=int(d["codigo"]),
                 descricao=d["descricao"],
-                estado=d["estado"]
+                estado=d["estado"],
             )
-            cidades.append(cidade)
-        return cidades
+            for d in dados_json
+        ]
 
-    @staticmethod
-    def buscar_cidade(codigo: int) -> Cidades:
-        pasta_archives = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'archives')
-        path_cidades = os.path.join(pasta_archives, "Cidades.txt")
-        os.makedirs(pasta_archives, exist_ok=True)
-        cidades = []
-        with open(path_cidades, "r", encoding="utf-8") as arquivo:
-            cidades = json.load(arquivo)
-        cidade_achada = None
-        for cidade in cidades:
-            if codigo == int(cidade['codigo']):
-                cidade_achada = cidade
-        if cidade_achada is None:
+    def buscar_cidade(self, codigo: int) -> Cidades:
+        cidades = self.__ler_arquivo()
+        cidade_dict: Optional[dict] = next(
+            (c for c in cidades if int(c["codigo"]) == codigo), None
+        )
+
+        if not cidade_dict:
             raise ObjectNotExistsException("Cidade não encontrada!")
-        return cidade_achada
+
+        return Cidades(**cidade_dict)
 
     def excluir_cidade(self, codigo: int) -> None:
         indices, raiz = self.carregar_arvore_binaria()
         dados: List[Cidades] = self.buscar_todas_cidades()
 
         if not indices or not dados:
-            return
+            return None
 
         def encontrar_minimo(index):
             while indices[index].esquerda != -1:
@@ -110,48 +101,34 @@ class CidadeService:
                 no.index = indices[min_index].index
                 no.direita = remover(no.direita, indices[min_index].info)
             return atual_index
-        nova_raiz = remover(raiz, codigo)
-        # Esses ':' servem substitui todos os elementos da lista existente com os novos elementos. Parecendo um ponteiro(Mesmo que em Pitão não tenha)
-        dados[:] = [c for c in dados if c.codigo != codigo]
-        indices[:] = [n for n in indices if n is not None]
-        for i, no in enumerate(indices):
-            if no.esquerda != -1 and no.esquerda >= len(indices):
-                no.esquerda = -1
-            if no.direita != -1 and no.direita >= len(indices):
-                no.direita = -1
-            if no.index >= len(dados):
-                no.index = len(dados) - 1 if dados else -1
-        with open(self.path_dados, "r+") as f:
-            f.truncate(0)
-        dados_json = [cidade.__dict__ for cidade in dados]
-        with open(self.path_dados, "w", encoding="utf-8") as f:
-            json.dump(dados_json, f, ensure_ascii=False, indent=4)
-        return nova_raiz
 
-    def __ver_se_existe_na_lista(self, lista_codigo, codigo_atual):
-        tem = False
-        for codigo in lista_codigo:
-            if codigo_atual == codigo:
-                tem = True
-                break
-        return tem
+        nova_raiz = remover(raiz, codigo)
+
+        # Atualiza os dados
+        dados = [c for c in dados if c.codigo != codigo]
+        dados_json = [c.to_dict() for c in dados]
+        self.__salvar_arquivo(dados_json)
+
+        return nova_raiz
 
     def leitura_exaustiva(self):
         dados = self.buscar_todas_cidades()
         indices = self.carregar_arvore_binaria()
         usados = set()
         dados_ordenados = []
+
         while len(usados) < len(dados):
             menor = None
             for registro in indices[0]:
                 codigo = registro.info
-                if not self.__ver_se_existe_na_lista(usados, codigo):
+                if codigo not in usados:
                     if menor is None or codigo < menor.info:
                         menor = registro
             if menor:
                 usados.add(menor.info)
                 dados_ordenados.append(dados[menor.index])
-        return [cidade.__dict__ for cidade in dados_ordenados]
+
+        return [cidade.to_dict() for cidade in dados_ordenados]
 
     def carregar_arvore_binaria(self) -> ArvoreBinaria:
         return ArvoreBinaria.construir_arvore(self.buscar_todas_cidades())

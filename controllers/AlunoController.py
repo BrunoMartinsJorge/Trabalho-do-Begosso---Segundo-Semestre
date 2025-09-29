@@ -8,7 +8,6 @@ aluno_bp = Blueprint("aluno", __name__, url_prefix="/alunos")
 
 alunoService = AlunoService()
 
-
 @aluno_bp.route("/cadastrar_aluno", methods=["POST"])
 def cadastrar_aluno():
     data = request.get_json()
@@ -27,7 +26,7 @@ def calcular_imc():
         codigo_int = int(codigo)
     except (TypeError, ValueError):
         return {"erro": f"Código inválido: {codigo}"}, 400
-    return jsonify(AlunoService.calcular_imc(AlunoService, codigo_int))
+    return jsonify(alunoService.calcular_imc(AlunoService, codigo_int))
 
 @aluno_bp.route("/buscar_aluno_por_codigo", methods=["GET"])
 def buscar_aluno_por_codigo():
@@ -37,10 +36,8 @@ def buscar_aluno_por_codigo():
     except (TypeError, ValueError):
         return {"erro": f"Código inválido: {codigo}"}, 400
 
-    aluno = AlunoService.buscar_aluno(codigo_int)
+    aluno = alunoService.buscar_aluno(codigo_int)
     return jsonify(aluno)
-
-
 
 @aluno_bp.route("/apagar_alunos_por_codigo", methods=["POST"])
 def apagar_aluno_por_codigo():
@@ -48,7 +45,9 @@ def apagar_aluno_por_codigo():
     alunoService.excluir_aluno(int(codigo))
     return "Cidade apagada com sucesso!"
 
-
 @aluno_bp.route("/buscar_todos", methods=["GET"])
 def leitura_exaustiva():
-    return alunoService.buscar_alunos_tabela()
+    alunos = alunoService.buscar_todos_alunos()
+    alunos_dict = [aluno.to_dict() for aluno in alunos]
+    return jsonify(alunos_dict)
+
