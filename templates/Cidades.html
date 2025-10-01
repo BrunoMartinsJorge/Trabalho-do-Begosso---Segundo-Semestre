@@ -78,6 +78,121 @@
         <p>Trabalho Prático - Estruturas de Arquivos Indexados &copy; 2025</p>
     </footer>
 
-    <script src="../static/script.js"></script>
+    <script>
+
+        const cidadesPage = document.getElementById("cidades-form");
+        if (cidadesPage) {
+            const cidadesTbody = document.getElementById("cidades-tbody");
+            const btnBuscar = document.getElementById("btn-buscar");
+
+            function renderizarCidades() {
+                cidadesTbody.innerHTML = "";
+                fetch(`/cidades/leitura_exaustiva`, {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                }).then(response => response.json()).then((data) => {
+                    data.forEach((cidade) => {
+                        cidadesTbody.innerHTML += `
+                    <tr>
+                        <td>${cidade.codigo}</td>
+                        <td>${cidade.descricao}</td>
+                        <td>${cidade.estado}</td>
+                        <td class="action-buttons">
+                            <button class="btn-delete" data-id="${cidade.codigo}" title="Excluir">🗑️</button>
+                        </td>
+                    </tr>`;
+                    });
+                })
+                    .catch(error => console.error("Erro:", error));
+            }
+
+            //Cadastrar cidades
+            cidadesPage.addEventListener("submit", (e) => {
+                e.preventDefault();
+                const formElements = e.target.elements;
+                const codigo = parseInt(formElements["cidade-codigo"].value);
+                const resultadoDiv = document.getElementById("resultado-busca-cidade");
+                resultadoDiv.classList.remove("hidden");
+                const novaCidade = {
+                    codigo,
+                    descricao: formElements["cidade-descricao"].value,
+                    estado: formElements["cidade-estado"].value.toUpperCase(),
+                };
+                resultadoDiv.innerHTML = '';
+                fetch("/cidades/cadastrar_cidade", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(novaCidade)
+                })
+                    .then(async response => {
+                        const data = await response.json();
+                        if (!response.ok) {
+                            resultadoDiv.innerHTML = `❌ Cidade com código #${
+                                codigo || "inválido"
+                            } já existe.`;
+                            throw new Error(data.erro);
+                        }
+                        cidadesPage.reset();
+                        renderizarCidades();
+                    })
+                    .catch(error => {
+                        console.error("Erro:", error);
+                    });
+            });
+
+            //Buscar cidades
+            btnBuscar.addEventListener("click", () => {
+                const id = parseInt(document.getElementById("busca").value);
+                const resultadoDiv = document.getElementById("resultado-busca-cidade");
+                resultadoDiv.classList.remove("hidden");
+                fetch(`/cidades/buscar_cidade_por_codigo?codigo=${id}`, {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        const cidade = data;
+                        if (cidade) {
+                            resultadoDiv.innerHTML = `
+                        <strong> Cidade Encontrada:</strong><br>
+                        <strong>Código:</strong> #${cidade.codigo}<br>
+                        <strong>Descrição:</strong> ${cidade.descricao}<br>
+                        <strong>Estado:</strong> ${cidade.estado}
+                    `;
+                        } else {
+                            resultadoDiv.innerHTML = `❌ Aluno com código #${
+                                id || "inválido"
+                            } não encontrado.`;
+                        }
+                    })
+                    .catch(error => console.error("Erro:", error));
+            });
+
+            cidadesTbody.addEventListener("click", (e) => {
+                const deleteButton = e.target.closest(".btn-delete");
+                if (deleteButton) {
+                    const id = parseInt(deleteButton.dataset.id);
+                    fetch(`/cidades/apagar_cidades_por_codigo?codigo=${id}`, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                    })
+                        .then(data => {
+                            renderizarCidades();
+                        })
+                        .catch(error => console.error("Erro:", error));
+                }
+            });
+
+            renderizarCidades();
+        }
+    </script>
 </body>
 </html>

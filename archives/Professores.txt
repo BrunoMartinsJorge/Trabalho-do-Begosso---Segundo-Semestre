@@ -28,10 +28,10 @@
         "codCidade": 1
     },
     {
-        "codigo": 11,
-        "nome": "11",
-        "endereco": "11",
-        "telefone": "11",
-        "codCidade": 1
+        "codigo": 5,
+        "nome": "Arthur",
+        "endereco": "198271282",
+        "telefone": "Palmital",
+        "codCidade": 5
     }
 ]

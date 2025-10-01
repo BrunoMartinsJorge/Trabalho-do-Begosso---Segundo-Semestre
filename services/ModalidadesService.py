@@ -223,7 +223,6 @@ class ModalidadesService:
     @staticmethod
     def faturamento_por_modalidade(codigo: int) -> FaturamentoModalidadeDto:
         modalidade = ModalidadesService.buscar_modalidades(codigo)['modalidade']
-        print(modalidade)
         informacoes_professor = ModalidadesService.__informacoes_professor_modalidade(int(modalidade['codProfessor']))
         return FaturamentoModalidadeDto(modalidade['descricao'], informacoes_professor['professor'],
                                         informacoes_professor['cidade'],

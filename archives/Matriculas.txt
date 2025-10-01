@@ -52,5 +52,17 @@
         "codAluno": "7",
         "codModalidade": "6",
         "quantidadeAulas": "10"
+    },
+    {
+        "codigo": 11,
+        "codAluno": "6",
+        "codModalidade": "9",
+        "quantidadeAulas": "10"
+    },
+    {
+        "codigo": 12,
+        "codAluno": "9",
+        "codModalidade": "4",
+        "quantidadeAulas": "10"
     }
 ]

@@ -12,7 +12,8 @@ def cadastrar_cidade():
     codigo = data['codigo']
     descricao = data['descricao']
     estado = data['estado']
-    return jsonify(cidadeService.inserir_cidade(Cidades(int(codigo), descricao, estado)))
+    cidadeService.inserir_cidade(Cidades(int(codigo), descricao, estado))
+    return jsonify("Cidade cadastrada com sucesso!")
 
 
 @cidade_bp.route("/buscar_cidade_por_codigo", methods=["GET"])

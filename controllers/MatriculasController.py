@@ -9,7 +9,6 @@ matriculaService = MatriculasService()
 @matriculas_bp.route("/cadastrar_matricula", methods=["POST"])
 def cadastrar_matricula():
     data = request.get_json()
-    print(data)
     codigo = data['codigo']
     codAluno = data['codAluno']
     codModalidade = data['codModalidade']

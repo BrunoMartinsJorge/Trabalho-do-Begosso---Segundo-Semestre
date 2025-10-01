@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestão de Matrículas - PowerOn Gym</title>
+    <title>PowerOn Academia</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='icon.png') }}">
 </head>
@@ -92,8 +92,6 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', () => {
-
-        //Seleção dos Elementos da Página
         const form = document.getElementById('matriculas-form');
         const tbody = document.getElementById('matriculas-tbody');
         const btnBuscar = document.getElementById('btn-buscar');
@@ -102,8 +100,6 @@
         const alunoSelect = document.getElementById('matricula-aluno');
         const modalidadeSelect = document.getElementById('matricula-modalidade');
 
-
-        //Busca a lista de alunos no back-end
         async function carregarAlunos() {
             try {
                 const response = await fetch('/alunos/buscar_todos');
@@ -116,7 +112,6 @@
             }
         }
 
-        //Busca a lista de modalidades no back-end
         async function carregarModalidades() {
             try {
                 const response = await fetch('/modalidades/leitura_exaustiva');
@@ -129,7 +124,6 @@
             }
         }
 
-        //leitura exaustiva e renderização da tabela.
         async function renderizarTabela() {
             try {
                 const response = await fetch('/matriculas/listar_todos');
@@ -155,7 +149,7 @@
             }
         }
 
-        // Adicionar nova matricula
+        //Cadastrar Matricula
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
             const novaMatricula = {
@@ -186,7 +180,7 @@
             }
         });
 
-        // Buscar matricula por código
+        // Buscar matricula
         btnBuscar.addEventListener('click', async () => {
             const codigo = buscaInput.value;
             if (!codigo) return;
@@ -211,8 +205,6 @@
             }
         });
 
-
-        // Excluir matricula
         tbody.addEventListener('click', async (e) => {
             const deleteButton = e.target.closest('.btn-delete');
             if (deleteButton) {

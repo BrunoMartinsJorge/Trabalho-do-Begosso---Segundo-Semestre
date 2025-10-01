@@ -153,5 +153,20 @@
         "codigo": 31,
         "descricao": "São José dos Campos",
         "estado": "SP"
+    },
+    {
+        "codigo": 32,
+        "descricao": "Paraguaçu",
+        "estado": "SP"
+    },
+    {
+        "codigo": 47,
+        "descricao": "Frutal do Campo",
+        "estado": "SP"
+    },
+    {
+        "codigo": 70,
+        "descricao": "Cascavel",
+        "estado": "SP"
     }
 ]

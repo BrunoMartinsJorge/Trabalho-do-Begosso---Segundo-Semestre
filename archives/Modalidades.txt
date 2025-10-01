@@ -21,7 +21,7 @@
         "codProfessor": 4,
         "valorDaAula": 80,
         "limiteAlunos": 12,
-        "totalMatriculas": 2
+        "totalMatriculas": 3
     },
     {
         "codigo": 2,
@@ -43,8 +43,24 @@
         "codigo": 6,
         "descricao": "Handboll",
         "codProfessor": 1,
-        "valorDaAula": 52,
+        "valorDaAula": 52.25,
         "limiteAlunos": 1,
+        "totalMatriculas": 1
+    },
+    {
+        "codigo": 8,
+        "descricao": "Ping Pong",
+        "codProfessor": 2,
+        "valorDaAula": 30,
+        "limiteAlunos": 5,
+        "totalMatriculas": 0
+    },
+    {
+        "codigo": 9,
+        "descricao": "Montaria",
+        "codProfessor": 2,
+        "valorDaAula": 200,
+        "limiteAlunos": 10,
         "totalMatriculas": 1
     }
 ]

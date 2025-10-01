@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Relatórios - PowerOn Gym</title>
+    <title>PowerOn Academia</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='icon.png') }}">
 </head>
@@ -31,40 +31,39 @@
         <h2>Relatórios da Academia</h2>
 
         <h3>Faturamento por Modalidade</h3>
-        <h3>Consultar e Listar Modalidades</h3>
         <div class="area-busca">
-            <input type="number" id="busca" placeholder="Buscar por Código">
+            <input type="number" id="busca-relatorio" placeholder="Buscar por Código">
             <button id="btn-buscar">Buscar</button>
         </div>
         <div id="resultado-busca-modalidade" class="resultado-destaque hidden"></div>
-        </div>
+    </div>
 
-        <hr>
+    <hr>
 
-        <h3>Relatório Geral de Matrículas</h3>
-        <form>
-            <div class="form-group-full">
-                <button type="submit" class="btn btn-secondary" id="btn-relatorio-geral">Listar Matrículas</button>
-            </div>
-        </form>
-        <div class="table-container">
-            <table>
-                <thead>
-                <tr>
-                    <th>Cód. Matrícula</th>
-                    <th>Nome do Aluno</th>
-                    <th>Cidade do Aluno</th>
-                    <th>Modalidade</th>
-                    <th>Professor</th>
-                    <th>Valor a Pagar</th>
-                </tr>
-                </thead>
-                <tbody id="relatorioGeralTbody">
-                </tbody>
-            </table>
+    <h3>Relatório Geral de Matrículas</h3>
+    <form>
+        <div class="form-group-full">
+            <button type="button" class="btn btn-secondary" id="btn-relatorio-geral">Listar Matrículas</button>
         </div>
-        <div id="relatorio-geral-totais" class="resultado-destaque hidden" style="margin-top: 1.5rem;">
-        </div>
+    </form>
+    <div class="table-container">
+        <table>
+            <thead>
+            <tr>
+                <th>Cód. Matrícula</th>
+                <th>Nome do Aluno</th>
+                <th>Cidade do Aluno</th>
+                <th>Modalidade</th>
+                <th>Professor</th>
+                <th>Valor a Pagar</th>
+            </tr>
+            </thead>
+            <tbody id="relatorioGeralTbody">
+            </tbody>
+        </table>
+    </div>
+    <div id="relatorio-geral-totais" class="resultado-destaque hidden" style="margin-top: 1.5rem;">
+    </div>
     </div>
 </main>
 
@@ -72,6 +71,110 @@
     <p>Trabalho - Estruturas de Arquivos Indexados &copy; 2025</p>
 </footer>
 
-<script src="../static/script.js"></script>
+<script>
+    function calcularFaturamentoModalidade(lista) {
+        if (lista.length === 0)
+            return 0;
+        let soma = 0;
+        lista.forEach(element => {
+            soma += element.valorPagar;
+        })
+        return parseFloat(soma);
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+        const btnBuscar = document.getElementById("btn-buscar");
+        const listarTodasMatriculas = document.getElementById("btn-relatorio-geral");
+        const resultadoDiv = document.getElementById("resultado-busca-modalidade");
+        const tabela = document.getElementById("relatorioGeralTbody");
+        const relatorioGeral = document.getElementById("relatorio-geral-totais");
+
+        if (btnBuscar && resultadoDiv) {
+            btnBuscar.addEventListener("click", () => {
+                const id = parseInt(document.getElementById("busca-relatorio").value);
+                resultadoDiv.classList.remove("hidden");
+
+                if (isNaN(id)) {
+                    resultadoDiv.classList.remove("hidden");
+                    resultadoDiv.innerHTML = "⚠️ Informe um código válido.";
+                    return;
+                }
+
+                fetch(`/relatorio/listar-relatorio-modalidades?codigo=${id}`, {
+                    method: "GET",
+                    headers: {"Content-Type": "application/json"}
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error("Erro na resposta da API");
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data) {
+                            resultadoDiv.innerHTML = '';
+                            resultadoDiv.innerHTML = `
+                            <h4>📊 Relatório de Modalidade</h4>
+                            <p>Modalidade: ${data.modalidade}</p>
+                            <p>Cidade: ${data.professor}</p>
+                            <p>Professor: ${data.cidadeProfessor}</p>
+                            <p>Valor Faturado: ${data.valorFaturado}</p>
+                        `;
+                        } else {
+                            resultadoDiv.innerHTML = `❌ Nenhum relatório encontrado para o código <strong>#${id}</strong>.`;
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Erro ao buscar relatório:", error);
+                        resultadoDiv.innerHTML = "❌ Erro ao buscar relatório.";
+                    });
+            });
+        }
+
+        if (listarTodasMatriculas && resultadoDiv) {
+            listarTodasMatriculas.addEventListener("click", (event) => {
+                relatorioGeral.classList.remove("hidden");
+                relatorioGeral.innerHTML = "⏳ Buscando relatório...";
+                fetch(`/relatorio/listar-relatorio-matriculas`, {
+                    method: "GET",
+                    headers: {"Content-Type": "application/json"}
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error("Erro na resposta da API");
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data && data.matriculas.length > 0) {
+                            tabela.innerHTML = '';
+                            data.matriculas.forEach((matricula) => {
+
+                                tabela.innerHTML += `
+                    <tr>
+                        <td>${matricula.codigo}</td>
+                        <td>${matricula.nomeAluno}</td>
+                        <td>${matricula.cidadeAluno}</td>
+                        <td>${matricula.modalidade}</td>
+                        <td>${matricula.professor}</td>
+                        <td>${matricula.valorPagar}</td>
+                    </tr>`;
+                            })
+                            relatorioGeral.innerHTML = `
+                                <p>Quantidade de Matriculas: ${data.qtdAlunos}</p>
+                                <p>Valor total: R$ ${calcularFaturamentoModalidade(data.matriculas)}</p>
+                            `
+                        } else {
+                            resultadoDiv.innerHTML = `❌ Nenhuma matricula encontrada!.`;
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Erro ao buscar relatório:", error);
+                        resultadoDiv.innerHTML = "❌ Erro ao buscar relatório.";
+                    });
+            })
+        }
+    });
+</script>
 </body>
 </html>

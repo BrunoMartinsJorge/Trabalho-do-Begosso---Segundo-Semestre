@@ -200,6 +200,15 @@ class MatriculasService:
         }
         return info
 
+    def quantidade_alunos_matriculados(self) -> int:
+        listaMatriculas = self.buscar_todas_matriculas()
+        listaAlunos = []
+        for matricula in listaMatriculas:
+            dadosMatricula = matricula.__dict__
+            if not int(dadosMatricula['codAluno']) in listaAlunos:
+                listaAlunos.append(int(dadosMatricula['codAluno']))
+        return len(listaAlunos)
+
     def leitura_exaustiva(self):
         dados = self.buscar_todas_matriculas()
         indices = self.carregar_arvore_binaria()

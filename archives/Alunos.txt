@@ -70,5 +70,45 @@
         "nascimento": "1212-12-12",
         "peso": 1,
         "altura": 10.0
+    },
+    {
+        "codigo": 10,
+        "nome": "Arthur",
+        "codCidade": 1,
+        "nascimento": "1212-12-12",
+        "peso": 88,
+        "altura": 1.84
+    },
+    {
+        "codigo": 11,
+        "nome": "Bruno Martins Jorge",
+        "codCidade": 1,
+        "nascimento": "1212-12-12",
+        "peso": 1,
+        "altura": 1.0
+    },
+    {
+        "codigo": 12,
+        "nome": "Teste",
+        "codCidade": 1,
+        "nascimento": "1212-12-12",
+        "peso": 12,
+        "altura": 12.0
+    },
+    {
+        "codigo": 30,
+        "nome": "Carlos (Soldado) José Alencar Azevedo",
+        "codCidade": 47,
+        "nascimento": "2025-10-07",
+        "peso": 90,
+        "altura": 1.6
+    },
+    {
+        "codigo": 1323,
+        "nome": "323",
+        "codCidade": 1,
+        "nascimento": "1212-12-12",
+        "peso": 12,
+        "altura": 12.0
     }
 ]

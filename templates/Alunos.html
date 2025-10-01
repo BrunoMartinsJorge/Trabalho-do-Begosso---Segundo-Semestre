@@ -94,6 +94,174 @@
     <p>Trabalho Prático - Estruturas de Arquivos Indexados &copy; 2025</p>
 </footer>
 
-<script src="../static/script.js"></script>
+<script>
+
+    function carregarCidadesEmSelect(selectId) {
+            const selectElement = document.getElementById(selectId);
+            if (!selectElement) return;
+
+            selectElement.innerHTML =
+                '<option value="" disabled selected>Selecione...</option>';
+            fetch("cidades/leitura_exaustiva").then(resp => resp.json()).then((data) => {
+                data.forEach((cidade) => {
+                    selectElement.innerHTML += `<option value="${cidade.codigo}">${cidade.descricao} - ${cidade.estado}</option>`;
+                });
+            })
+    }
+
+    const alunosPage = document.getElementById("alunos-form");
+        if (alunosPage) {
+            const alunosTbody = document.getElementById("alunos-tbody");
+            const btnBuscar = document.getElementById("btn-buscar");
+
+            function renderizarAlunos() {
+                alunosTbody.innerHTML = "";
+                fetch("/alunos/buscar_todos", {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json"
+                    }
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        data.forEach((aluno) => {
+                            const dataNasc = aluno.dataNascimento
+                                ? formatDateLocal(aluno.dataNascimento)
+                                : "Data não informada";
+                            alunosTbody.innerHTML += `
+                    <tr>
+                        <td>${aluno.codigo}</td>
+                        <td>${aluno.nome}</td>
+                        <td>${aluno.cidade}</td>
+                        <td>${dataNasc}</td>
+                        <td class="action-buttons">
+                            <button class="btn-info" data-id="${
+                                aluno.codigo
+                            }" title="Ver IMC">📊</button>
+                            <button class="btn-delete" data-id="${
+                                aluno.codigo
+                            }" title="Excluir">🗑️</button>
+                        </td>
+                    </tr>`;
+                        });
+                    })
+                    .catch(error => console.error("Erro:", error));
+            }
+
+            //Cadastrar alunos
+            alunosPage.addEventListener("submit", (e) => {
+                e.preventDefault();
+                const formElements = e.target.elements;
+                const codigo = parseInt(formElements["aluno-codigo"].value);
+                const resultadoDiv = document.getElementById("resultado-busca-aluno");
+                const novoAluno = {
+                    codigo,
+                    nome: formElements["aluno-nome"].value,
+                    codigo_cidade: parseInt(formElements["aluno-cidade"].value),
+                    nascimento: formElements["aluno-nascimento"].value,
+                    peso: parseFloat(formElements["aluno-peso"].value),
+                    altura: parseFloat(formElements["aluno-altura"].value),
+                };
+                fetch("/alunos/cadastrar_aluno", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(novoAluno)
+                })
+                    .then(async response => {
+                            const data = await response.json();
+                            if (!response.ok) {
+                                resultadoDiv.classList.remove("hidden");
+                                resultadoDiv.innerHTML = `❌ ${data.erro}`;
+                                throw new Error(data.erro);
+                            }
+                            const lista = document.getElementById("lista-cidades");
+                            data.forEach(cidade => {
+                                const li = document.createElement("li");
+                                li.textContent = `${cidade.codigo} - ${cidade.descricao} (${cidade.estado})`;
+                                lista.appendChild(li);
+                            });
+                        }
+                    ).catch(error => console.error("Erro:", error));
+                alunosPage.reset();
+                renderizarAlunos();
+            });
+
+            //Buscar alunos
+            btnBuscar.addEventListener("click", () => {
+                const id = parseInt(document.getElementById("busca").value);
+                const resultadoDiv = document.getElementById("resultado-busca-aluno");
+                let aluno;
+                resultadoDiv.classList.remove("hidden");
+                fetch(`/alunos/buscar_aluno_por_codigo?codigo=${id}`, {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        aluno = data;
+                        if (aluno) {
+                            resultadoDiv.innerHTML = `
+                    <strong> Aluno Encontrado:</strong><br>
+                    <strong>Código:</strong> #${aluno.aluno.codigo} - ${aluno.aluno.nome}<br>
+                    <strong>Cidade:</strong> ${aluno.cidade.nome} - ${aluno.cidade.estado}<br>
+                    <strong>Diagnóstico Corporal:</strong> ${aluno.imc}
+                `;
+                        } else {
+                            resultadoDiv.innerHTML = `❌ Aluno com código #${
+                                id || "inválido"
+                            } não encontrado.`;
+                        }
+                    })
+                    .catch(error => console.error("Erro:", error));
+            });
+
+            alunosTbody.addEventListener("click", (e) => {
+                const button = e.target.closest("button");
+                if (!button) return;
+                const id = parseInt(button.dataset.id);
+
+                if (button.matches(".btn-delete")) {
+                    fetch(`/alunos/apagar_alunos_por_codigo?codigo=${id}`, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                    })
+                        .then(data => {
+                            renderizarAlunos();
+                        })
+                        .catch(error => console.error("Erro:", error));
+                }
+                if (button.matches(".btn-info")) {
+                    fetch(`/alunos/calcular_imc?codigo=${id}`, {
+                        method: "GET",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                    })
+                        .then(async data => {
+                            const aluno = await data.json();
+                            alert(
+                                `Diagnóstico para ${aluno.nome}:\n${aluno.imc}`
+                            );
+                        })
+                        .catch(error => console.error("Erro:", error));
+                }
+            });
+
+            carregarCidadesEmSelect("aluno-cidade");
+            renderizarAlunos();
+        }
+
+        function formatDateLocal(iso) {
+            if (!iso) return '';
+            const [year, month, day] = iso.split('-');
+            return new Date(year, month - 1, day).toLocaleDateString('pt-BR');
+        }
+</script>
 </body>
 </html>

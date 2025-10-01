@@ -19,6 +19,21 @@ class AlunoService:
         self.cidadeService = CidadeService()
         self.cidadeService = CidadeService()
 
+    def __carregar_dados_arquivos(self):
+        pasta_archives = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'archives')
+        path_alunos = os.path.join(pasta_archives, "Alunos.txt")
+        os.makedirs(pasta_archives, exist_ok=True)
+
+        if os.path.exists(path_alunos):
+            with open(path_alunos, "r", encoding="utf-8") as arquivo:
+                try:
+                    alunos = json.load(arquivo)
+                except json.JSONDecodeError:
+                    alunos = []
+        else:
+            alunos = []
+        return alunos
+
     def __verificar_se_codigo_existe(self, alunos: List[Any], novo_aluno: Alunos) -> None:
         for aluno in alunos:
             if novo_aluno.codigo == int(aluno['codigo']):
@@ -37,7 +52,6 @@ class AlunoService:
         lista_alunos: list[dict] = []
         for aluno in alunos:
             cidade = self.cidadeService.buscar_cidade(int(aluno['codCidade']))
-            print(cidade)
             cidade_estado = cidade['descricao'] + ' - ' + cidade['estado']
             aluno_elemento = ListaAlunos(
                 int(aluno['codigo']),
@@ -48,28 +62,12 @@ class AlunoService:
             lista_alunos.append(aluno_elemento.to_dict())
         return lista_alunos
 
-    @staticmethod
-    def inserir_aluno(novo_aluno: Alunos) -> Any:
-        pasta_archives = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'archives')
-        path_alunos = os.path.join(pasta_archives, "Alunos.txt")
-        os.makedirs(pasta_archives, exist_ok=True)
-
-        if os.path.exists(path_alunos):
-            with open(path_alunos, "r", encoding="utf-8") as arquivo:
-                try:
-                    alunos = json.load(arquivo)
-                except json.JSONDecodeError:
-                    alunos = []
-        else:
-            alunos = []
-
-        AlunoService.__verificar_se_codigo_existe(AlunoService, alunos, novo_aluno)
-
+    def inserir_aluno(self, novo_aluno: Alunos) -> Any:
+        alunos = self.__carregar_dados_arquivos()
+        self.__verificar_se_codigo_existe(alunos, novo_aluno)
         alunos.append(novo_aluno.to_dict())
-
-        with open(path_alunos, "w", encoding="utf-8") as arquivo:
+        with open(self.path_dados, "w", encoding="utf-8") as arquivo:
             json.dump(alunos, arquivo, indent=4, ensure_ascii=False)
-
         alunos = [Alunos(**d) for d in alunos]
         return jsonify([c.to_dict() for c in alunos]), 201
 
@@ -168,7 +166,7 @@ class AlunoService:
 
         nova_raiz = remover(raiz, codigo)
 
-        # Esses ':' servem para substituir todos os elementos da lista existente pelos novos
+        # Esses ':' servem substitui todos os elementos da lista existente com os novos elementos. Parecendo um ponteiro(Mesmo que em Pitão não tenha)
         dados[:] = [c for c in dados if c.codigo != codigo]
         indices[:] = [n for n in indices if n is not None]
 

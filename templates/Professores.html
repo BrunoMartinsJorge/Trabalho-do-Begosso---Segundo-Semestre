@@ -92,6 +92,138 @@
         <p>Trabalho Prático - Estruturas de Arquivos Indexados &copy; 2025</p>
     </footer>
 
-    <script src="../static/script.js"></script>
+    <script>
+
+         function carregarCidadesEmSelect(selectId) {
+            const selectElement = document.getElementById(selectId);
+            if (!selectElement) return;
+
+            selectElement.innerHTML =
+                '<option value="" disabled selected>Selecione...</option>';
+            fetch("cidades/leitura_exaustiva").then(resp => resp.json()).then((data) => {
+                data.forEach((cidade) => {
+                    selectElement.innerHTML += `<option value="${cidade.codigo}">${cidade.descricao} - ${cidade.estado}</option>`;
+                });
+            })
+        }
+
+        const professoresPage = document.getElementById("professores-form");
+        if (professoresPage) {
+            const professoresTbody = document.getElementById("professores-tbody");
+            const btnBuscar = document.getElementById("btn-buscar");
+
+            function renderizarProfessores() {
+                professoresTbody.innerHTML = "";
+                fetch(`/professores/listar_todos`, {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                }).then(response => response.json()).then((data) => {
+                    data.forEach((professor) => {
+                        professoresTbody.innerHTML += `
+                    <tr>
+                        <td>${professor.codigo}</td>
+                        <td>${professor.nome}</td>
+                        <td>${professor.endereco}</td>
+                        <td>${professor.telefone}</td>
+                        <td>${professor.cidade}</td>
+                        <td class="action-buttons">
+                            <button class="btn-delete" data-id="${professor.codigo}" title="Excluir">🗑️</button>
+                        </td>
+                    </tr>`;
+                    })
+                });
+            }
+            //Cadastrar Professores
+            professoresPage.addEventListener("submit", (e) => {
+                e.preventDefault();
+                const formElements = e.target.elements;
+                const codigo = parseInt(formElements["professor-codigo"].value);
+                const resultadoDiv = document.getElementById("resultado-busca-professor");
+                resultadoDiv.classList.remove("hidden");
+                const novoProfessor = {
+                    codigo,
+                    nome: formElements["professor-nome"].value,
+                    endereco: formElements["professor-endereco"].value,
+                    telefone: formElements["professor-telefone"].value,
+                    codigo_cidade: parseInt(formElements["professor-cidade"].value),
+                };
+                fetch("/professores/cadastrar_profesor", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(novoProfessor)
+                })
+                    .then(async response => {
+                        const data = await response.json();
+                        if (!response.ok) {
+                            resultadoDiv.innerHTML = `❌ Professor com código #${
+                                codigo || "inválido"
+                            } já existe.`;
+                            throw new Error(data.erro);
+                        }
+                        professoresPage.reset();
+                        renderizarProfessores();
+                    })
+                    .catch(error => {
+                        console.error("Erro:", error);
+                    });
+            });
+
+            //Busca Professores
+            btnBuscar.addEventListener("click", () => {
+                const id = parseInt(document.getElementById("busca").value);
+                let professor;
+                const resultadoDiv = document.getElementById("resultado-busca-professor");
+                resultadoDiv.classList.remove("hidden");
+
+                fetch(`/professores/buscar_professor_por_codigo?codigo=${id}`, {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        professor = data
+                        if (professor) {
+                            resultadoDiv.innerHTML = `
+                    <strong> Professor Encontrado:</strong><br>
+                    <strong>Código:</strong> #${professor.professor.codigo} - ${professor.professor.nome}<br>
+                    <strong>Endereço:</strong> ${professor.professor.endereco}<br>
+                    <strong>Telefone:</strong> ${professor.professor.telefone}<br>
+                    <strong>Cidade:</strong> ${professor.cidade.nome} - ${professor.cidade.estado}
+                 `;
+                        } else {
+                            resultadoDiv.innerHTML = `❌ Professor com código #${
+                                id || "inválido"
+                            } não encontrado.`;
+                        }
+                    });
+            });
+
+            professoresTbody.addEventListener("click", (e) => {
+                const deleteButton = e.target.closest(".btn-delete");
+                if (deleteButton) {
+                    const id = parseInt(deleteButton.dataset.id);
+                    fetch(`/professores/apagar_profesor_por_codigo?codigo=${id}`, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                    })
+                        .then(data => {
+                            renderizarProfessores();
+                        })
+                        .catch(error => console.error("Erro:", error));
+                }
+            });
+
+            carregarCidadesEmSelect("professor-cidade");
+            renderizarProfessores();
+        }
+    </script>
 </body>
 </html>

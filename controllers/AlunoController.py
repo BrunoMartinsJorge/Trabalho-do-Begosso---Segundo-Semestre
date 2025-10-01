@@ -20,7 +20,6 @@ def cadastrar_aluno():
     altura = float(data["altura"])
     return alunoService.inserir_aluno(Alunos(int(codigo), nome, codCidade, data_nascimento, peso, altura))
 
-
 @aluno_bp.route("/calcular_imc", methods=["GET"])
 def calcular_imc():
     codigo = request.args.get("codigo")
@@ -28,8 +27,7 @@ def calcular_imc():
         codigo_int = int(codigo)
     except (TypeError, ValueError):
         return {"erro": f"Código inválido: {codigo}"}, 400
-    return jsonify(alunoService.calcular_imc(AlunoService, codigo_int))
-
+    return jsonify(alunoService.calcular_imc(int(codigo_int)))
 
 @aluno_bp.route("/buscar_aluno_por_codigo", methods=["GET"])
 def buscar_aluno_por_codigo():
@@ -42,13 +40,11 @@ def buscar_aluno_por_codigo():
     aluno = alunoService.buscar_aluno(codigo_int)
     return jsonify(aluno)
 
-
 @aluno_bp.route("/apagar_alunos_por_codigo", methods=["POST"])
 def apagar_aluno_por_codigo():
     codigo = request.args.get("codigo")
     alunoService.excluir_aluno(int(codigo))
     return "Cidade apagada com sucesso!"
-
 
 @aluno_bp.route("/buscar_todos", methods=["GET"])
 def leitura_exaustiva():

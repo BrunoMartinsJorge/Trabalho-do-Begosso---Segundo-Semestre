@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestão de Modalidades - PowerOn Gym</title>
+    <title>PowerOn Academia</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='icon.png') }}">
 </head>
@@ -93,6 +93,142 @@
     <p>Trabalho Prático - Estruturas de Arquivos Indexados &copy; 2025</p>
 </footer>
 
-<script src="../static/script.js"></script>
+<script>
+
+    function carregarProfessoresEmSelect(selectId) {
+            const selectElement = document.getElementById(selectId);
+            if (!selectElement) return;
+
+            selectElement.innerHTML =
+                '<option value="" disabled selected>Selecione...</option>';
+            fetch("professores/listar_todos").then(resp => resp.json()).then((data) => {
+                data.forEach((professor) => {
+                    selectElement.innerHTML += `<option value="${professor.codigo}">${professor.nome}</option>`;
+                });
+            })
+    }
+
+    const modalidadesPage = document.getElementById("modalidades-form");
+        if (modalidadesPage) {
+            const modalidadesTbody = document.getElementById("modalidades-tbody");
+            const btnBuscar = document.getElementById("btn-buscar");
+
+            function renderizarModalidades() {
+                modalidadesTbody.innerHTML = "";
+                fetch(`/modalidades/lista_tabela`, {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                }).then(response => response.json()).then((data) => {
+                    data.forEach((professor) => {
+                        modalidadesTbody.innerHTML += `
+                    <tr>
+                        <td>${professor.codigo}</td>
+                        <td>${professor.descricao}</td>
+                        <td>${professor.professor}</td>
+                        <td>${professor.valorAula}</td>
+                        <td>${professor.limite}</td>
+                        <td>${professor.totalMatriculados} Matriculado(s)</td>
+                        <td class="action-buttons">
+                            <button class="btn-delete" data-id="${professor.codigo}" title="Excluir">🗑️</button>
+                        </td>
+                    </tr>`;
+                    })
+                });
+            }
+
+            //Cadastrar Modalidades
+            modalidadesPage.addEventListener("submit", (e) => {
+                e.preventDefault();
+                const formElements = e.target.elements;
+                const codigo = parseInt(formElements["modalidade-codigo"].value);
+                const resultadoDiv = document.getElementById("resultado-busca-modalidade");
+                resultadoDiv.classList.remove("hidden");
+                const novaModalidade = {
+                    codigo,
+                    descricao: formElements["modalidade-descricao"].value,
+                    professor: formElements["modalidade-professor"].value,
+                    valorAula: formElements["modalidade-valor"].value,
+                    limite: parseInt(formElements["modalidade-limite"].value),
+                };
+                fetch("/modalidades/cadastrar_modalidade", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(novaModalidade)
+                })
+                    .then(async response => {
+                        const data = await response.json();
+                        if (!response.ok) {
+                            resultadoDiv.innerHTML = `❌ Professor com código #${
+                                codigo || "inválido"
+                            } já existe.`;
+                            throw new Error(data.erro);
+                        }
+                        modalidadesPage.reset();
+                        renderizarModalidades();
+                    })
+                    .catch(error => {
+                        console.error("Erro:", error);
+                    });
+            });
+
+            //Busca Modalidades
+            btnBuscar.addEventListener("click", () => {
+                const id = parseInt(document.getElementById("busca").value);
+                let professor;
+                const resultadoDiv = document.getElementById("resultado-busca-modalidade");
+                resultadoDiv.classList.remove("hidden");
+
+                fetch(`/modalidades/buscar_modalidade_por_codigo?codigo=${id}`, {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        modalidade = data
+                        if (modalidade) {
+                            resultadoDiv.innerHTML = `
+                    <strong> Modalidade Encontrada:</strong><br>
+                    <strong>Código:</strong> #${modalidade.modalidade.codigo}<br>
+                    <strong>Descrição:</strong> ${modalidade.modalidade.descricao}<br>
+                    <strong>Professor:</strong> ${modalidade.info.professor} - ${modalidade.info.cidade}<br>
+                    <strong>Valor da Aula:</strong> R$ ${modalidade.modalidade.valorDaAula}<br>
+                    <strong>Limite de Alunos:</strong> ${modalidade.modalidade.limiteAlunos}<br>
+                    <strong>Total de Matriculas:</strong> ${modalidade.modalidade.totalMatriculas}<br>
+                 `;
+                        } else {
+                            resultadoDiv.innerHTML = `❌ Professor com código #${
+                                id || "inválido"
+                            } não encontrado.`;
+                        }
+                    });
+            });
+
+            modalidadesTbody.addEventListener("click", (e) => {
+                const deleteButton = e.target.closest(".btn-delete");
+                if (deleteButton) {
+                    const id = parseInt(deleteButton.dataset.id);
+                    fetch(`/modalidades/apagar_modalidades_por_codigo?codigo=${id}`, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                    })
+                        .then(data => {
+                            renderizarModalidades();
+                        })
+                        .catch(error => console.error("Erro:", error));
+                }
+            });
+
+            carregarProfessoresEmSelect("modalidade-professor");
+            renderizarModalidades();
+        }
+</script>
 </body>
 </html>

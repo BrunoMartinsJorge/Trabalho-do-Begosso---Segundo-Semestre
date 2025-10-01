@@ -44,9 +44,6 @@ class CidadeService:
         with open(path_cidades, "w", encoding="utf-8") as arquivo:
             json.dump(cidades, arquivo, indent=4, ensure_ascii=False)
 
-        cidades = [Cidades(**d) for d in cidades]
-        return jsonify([c.to_dict() for c in cidades]), 201
-
     def buscar_todas_cidades(self) -> list[Cidades]:
         cidades = []
         with open(self.path_dados, "r", encoding="utf-8") as arquivo:
@@ -115,7 +112,7 @@ class CidadeService:
 
         nova_raiz = remover(raiz, codigo)
 
-        # Esses ':' servem para substituir todos os elementos da lista existente com os novos (tipo ponteiro)
+        # Esses ':' servem substitui todos os elementos da lista existente com os novos elementos. Parecendo um ponteiro(Mesmo que em Pitão não tenha)
         dados[:] = [c for c in dados if c.codigo != codigo]
         indices[:] = [n for n in indices if n is not None]
 

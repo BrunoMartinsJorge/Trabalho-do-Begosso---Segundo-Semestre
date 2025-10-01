@@ -8,6 +8,13 @@ relatorioService = RelatorioService()
 
 @relatorio_bp.route("/listar-relatorio-matriculas", methods=["GET"])
 def listar_relatorio_matriculas():
+    lista = relatorioService.listar_relatorio_matriculas()
+    return lista
+
+@relatorio_bp.route("/listar-relatorio-modalidades", methods=["GET"])
+def listar_relatorio_modalidades():
     codigo = request.args.get("codigo")
-    lista = relatorioService.listar_relatorio_matriculas(int(codigo))
-    return jsonify([dto.__dict__ for dto in lista])
+    modalidadeRelatorio = relatorioService.gerar_relatorio_modalidade(int(codigo))
+    if modalidadeRelatorio is None:
+        return jsonify(None)
+    return jsonify(modalidadeRelatorio.__dict__)
